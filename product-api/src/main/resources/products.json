@@ -1,0 +1,57 @@
+[
+  {
+    "id": 1,
+    "name": "Laptop Pro 15",
+    "description": "High-performance laptop with 16GB RAM and 512GB SSD",
+    "price": 1299.99,
+    "category": "Electronics",
+    "stock": 25,
+    "active": true,
+    "createdAt": "2024-01-15T10:30:00",
+    "updatedAt": "2024-01-15T10:30:00"
+  },
+  {
+    "id": 2,
+    "name": "Wireless Headphones",
+    "description": "Noise-cancelling wireless headphones with 30-hour battery life",
+    "price": 199.99,
+    "category": "Electronics",
+    "stock": 50,
+    "active": true,
+    "createdAt": "2024-01-16T14:20:00",
+    "updatedAt": "2024-01-16T14:20:00"
+  },
+  {
+    "id": 3,
+    "name": "Coffee Maker",
+    "description": "Programmable coffee maker with built-in grinder",
+    "price": 89.99,
+    "category": "Home & Kitchen",
+    "stock": 15,
+    "active": true,
+    "createdAt": "2024-01-17T09:15:00",
+    "updatedAt": "2024-01-17T09:15:00"
+  },
+  {
+    "id": 4,
+    "name": "Running Shoes",
+    "description": "Comfortable running shoes with advanced cushioning",
+    "price": 129.99,
+    "category": "Sports",
+    "stock": 30,
+    "active": true,
+    "createdAt": "2024-01-18T16:45:00",
+    "updatedAt": "2024-01-18T16:45:00"
+  },
+  {
+    "id": 5,
+    "name": "Smartphone",
+    "description": "Latest smartphone with 128GB storage and dual camera",
+    "price": 799.99,
+    "category": "Electronics",
+    "stock": 0,
+    "active": false,
+    "createdAt": "2024-01-19T11:30:00",
+    "updatedAt": "2024-01-19T11:30:00"
+  }
+]
