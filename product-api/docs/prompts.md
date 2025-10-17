@@ -17,7 +17,7 @@ Start with a single comprehensive prompt to lay the foundation and configure the
 | :--- | :--- |
 | **1.1 Initial Setup** | `Generate a Maven project structure for a **Java 21** Spring Boot 3.x application. Name the project 'product-api'. The application should be a **RESTful API** for managing 'Product' entities. Include the following dependencies: **Spring Web**, **Lombok**, and **Springdoc-OpenAPI UI** (for Swagger). The persistence layer will use a **local JSON file** (in the classpath) instead of a database for initial development. Set the application's package structure to use **com.example.productapi** as the base package.` |
 
-#### Eduardo's note: 
+#### 📝 Eduardo's note: 
 Here had an issue whe executing mkdir, from sigle command had to do one per directory.
 Also decided to change .property extension to .yml due more readability.
 
@@ -32,7 +32,7 @@ Define the data structure and create the initial data file.
 | **2.1 Product Model** | `In the **com.example.productapi.model** package, create a Java class named **Product**. It must be a **Lombok-annotated record** with the following fields: **String id**, **String name**, **String imageUrl**, **String description**, **double price**, **int rating**, and **Map<String, String> specifications**.` |
 | **2.2 Data File** | `Create a file named **products.json** in the **src/main/resources** directory. Populate it with an array containing at least **three example Product objects** that match the Java model, including unique IDs.` |
 
-#### Eduardo's note: 
+#### 📝 Eduardo's note: 
 I actually used only this:
 
 | Step | Prompt |
@@ -62,6 +62,14 @@ Implement the data access and business logic layers.
 | Step | Prompt |
 | :--- | :--- |
 | **3.3 Service Layer** | `In the **com.example.productapi.service** package, create a class named **ProductService**. It should be injected with **ProductRepository** and contain the following methods: **findAll()**, **findById(String id)**, **save(Product product)**, **update(String id, Product product)**, and **delete(String id)**. Implement the basic CRUD logic, delegating data access to the repository and handling basic business concerns like ID generation for new products.` |
+
+
+#### 📝 Eduardo's note: 
+I actually used only this:
+| Step | Prompt |
+| :--- | :--- |
+| **3.1 Repository Interface and Service** | `Want to reduce coupling between the service and the JSON file that is acting as DB, so create an interface **ProductRepository** in **com.example.productapi.repository** with all the needed methods, then create a class **ProductRepositoryImpl** that implements **ProductRepository**. This implementation must **read the data from the products.json** file using **Jackson** so that all the data access logic is moved from the Service to the repository, and only business logic remains in the Service. Add the proper test classes.` |
+
 
 ---
 

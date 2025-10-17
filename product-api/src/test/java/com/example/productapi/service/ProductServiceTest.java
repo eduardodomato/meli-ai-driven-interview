@@ -132,6 +132,24 @@ class ProductServiceTest {
     }
 
     @Test
+    void testUpdateProduct_RaceCondition_ProductDeletedConcurrently() {
+        // Given - Simulate race condition: product exists during existsById() but deleted before update()
+        Product updatedProduct = createSampleProduct(null, "Updated Laptop", "Electronics", new BigDecimal("1399.99"));
+        
+        when(productRepository.existsById(1L)).thenReturn(true);
+        when(productRepository.update(any(Product.class)))
+            .thenThrow(new IllegalArgumentException("Product with id 1 not found"));
+
+        // When
+        Optional<Product> result = productService.updateProduct(1L, updatedProduct);
+
+        // Then - Should return empty Optional instead of throwing exception
+        assertFalse(result.isPresent());
+        verify(productRepository).existsById(1L);
+        verify(productRepository).update(argThat(p -> p.getId().equals(1L)));
+    }
+
+    @Test
     void testDeleteProduct_ExistingProduct() {
         // Given
         when(productRepository.deleteById(1L)).thenReturn(true);

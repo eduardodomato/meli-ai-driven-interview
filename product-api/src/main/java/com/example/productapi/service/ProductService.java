@@ -44,8 +44,14 @@ public class ProductService {
         }
         
         updatedProduct.setId(id);
-        Product savedProduct = productRepository.update(updatedProduct);
-        return Optional.of(savedProduct);
+        try {
+            Product savedProduct = productRepository.update(updatedProduct);
+            return Optional.of(savedProduct);
+        } catch (IllegalArgumentException e) {
+            // Handle race condition: product was deleted between existsById() check and update() call
+            log.warn("Product with id {} was deleted concurrently during update operation", id);
+            return Optional.empty();
+        }
     }
 
     public boolean deleteProduct(Long id) {

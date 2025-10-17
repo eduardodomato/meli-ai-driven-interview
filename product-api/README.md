@@ -127,6 +127,31 @@ The Product API provides a comprehensive solution for managing product data with
   - Self-documenting API
   - Reduces integration time
 
+#### 8. **Race Condition Handling in Update Operations**
+- **Decision**: Graceful handling of concurrent modification scenarios
+- **Problem**: Race condition where product exists during `existsById()` check but is deleted before `update()` call
+- **Solution**: Catch `IllegalArgumentException` from repository and return `Optional.empty()`
+- **Rationale**:
+  - Maintains API contract consistency (returns `Optional<Product>`)
+  - Provides semantically correct HTTP 404 response to clients
+  - Preserves graceful degradation without breaking existing client code
+  - Logs the race condition for debugging purposes
+- **Trade-offs**: 
+  - Client doesn't know the specific reason for failure (race condition vs. non-existent product)
+  - Debugging requires log analysis to identify concurrent modification issues
+
+#### 9. **Service Layer Design - No Interface Pattern**
+- **Decision**: Direct dependency on concrete service classes without interfaces
+- **Rationale**:
+  - Follows KISS principle (Keep It Simple, Stupid)
+  - Aligns with Spring Boot philosophy of convention over configuration
+  - Avoids YAGNI violation (You Aren't Gonna Need It) - no multiple implementations needed
+  - Reduces complexity and maintenance overhead
+- **Trade-offs**:
+  - Less flexibility for future multiple implementations
+  - Slightly tighter coupling between controller and service layers
+  - Still maintains excellent testability through Spring's dependency injection
+
 ### Project Structure
 ```
 product-api/
@@ -300,4 +325,4 @@ For questions, issues, or contributions:
 
 ---
 
-**Built with ❤️ using Spring Boot and modern Java practices**
+**Built with dedication, using Spring Boot and modern Java practices**
