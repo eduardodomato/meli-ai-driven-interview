@@ -13,11 +13,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
 /**
  * REST Controller for Product operations
+ * OpenAPI (Swagger) Specification documentation to visualize and interact with the API's resources.
+ * 
+ * @author Eduardo Domato
  */
 @Slf4j
 @RestController
@@ -98,44 +102,24 @@ public class ProductController {
                       : ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/category/{category}")
-    @Operation(summary = "Get products by category", description = "Retrieve all products in a specific category")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Products found"),
-        @ApiResponse(responseCode = "404", description = "No products found in category")
-    })
-    public ResponseEntity<List<Product>> getProductsByCategory(
-            @Parameter(description = "Product category") @PathVariable String category) {
-        log.info("Getting products by category: {}", category);
-        List<Product> products = productService.getProductsByCategory(category);
-        return products.isEmpty() ? ResponseEntity.notFound().build() 
-                                 : ResponseEntity.ok(products);
-    }
-
-    @GetMapping("/rating/{minRating}")
-    @Operation(summary = "Get products by minimum rating", description = "Retrieve all products with rating greater than or equal to the specified minimum rating")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Products found"),
-        @ApiResponse(responseCode = "404", description = "No products found with the specified rating")
-    })
-    public ResponseEntity<List<Product>> getProductsByRating(
-            @Parameter(description = "Minimum rating (1-5)") @PathVariable Integer minRating) {
-        log.info("Getting products with minimum rating: {}", minRating);
-        List<Product> products = productService.getProductsByRating(minRating);
-        return products.isEmpty() ? ResponseEntity.notFound().build() 
-                                 : ResponseEntity.ok(products);
-    }
-
     @GetMapping("/search")
-    @Operation(summary = "Search products by name", description = "Search for products by name containing the search term")
+    @Operation(summary = "Search products with flexible criteria", description = "Search for products using multiple optional criteria including name, category, rating range, and price range")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Products found"),
-        @ApiResponse(responseCode = "404", description = "No products found")
+        @ApiResponse(responseCode = "404", description = "No products found matching criteria")
     })
-    public ResponseEntity<List<Product>> searchProductsByName(
-            @Parameter(description = "Search term") @RequestParam String name) {
-        log.info("Searching products by name: {}", name);
-        List<Product> products = productService.searchProductsByName(name);
+    public ResponseEntity<List<Product>> searchProducts(
+            @Parameter(description = "Search term for product name (case-insensitive)") @RequestParam(required = false) String name,
+            @Parameter(description = "Product category") @RequestParam(required = false) String category,
+            @Parameter(description = "Minimum rating (1-5)") @RequestParam(required = false) Integer minRating,
+            @Parameter(description = "Maximum rating (1-5)") @RequestParam(required = false) Integer maxRating,
+            @Parameter(description = "Minimum price") @RequestParam(required = false) BigDecimal minPrice,
+            @Parameter(description = "Maximum price") @RequestParam(required = false) BigDecimal maxPrice) {
+        
+        log.info("Searching products with criteria - name: {}, category: {}, minRating: {}, maxRating: {}, minPrice: {}, maxPrice: {}", 
+                name, category, minRating, maxRating, minPrice, maxPrice);
+        
+        List<Product> products = productService.searchProducts(name, category, minRating, maxRating, minPrice, maxPrice);
         return products.isEmpty() ? ResponseEntity.notFound().build() 
                                  : ResponseEntity.ok(products);
     }
