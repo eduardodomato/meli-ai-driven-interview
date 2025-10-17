@@ -3,6 +3,8 @@ package com.example.productapi.service;
 import com.example.productapi.model.Product;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -33,6 +36,8 @@ public class ProductService {
                          @Value("${app.data.file}") String dataFilePath) {
         this.resourceLoader = resourceLoader;
         this.objectMapper = new ObjectMapper();
+        this.objectMapper.registerModule(new JavaTimeModule());
+        this.objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         this.dataFilePath = dataFilePath;
     }
 
@@ -82,10 +87,6 @@ public class ProductService {
         product.setCreatedAt(LocalDateTime.now());
         product.setUpdatedAt(LocalDateTime.now());
         
-        if (product.getActive() == null) {
-            product.setActive(true);
-        }
-        
         products.add(product);
         log.info("Created product with id: {}", product.getId());
         return product;
@@ -100,8 +101,9 @@ public class ProductService {
                 existingProduct.setDescription(updatedProduct.getDescription());
                 existingProduct.setPrice(updatedProduct.getPrice());
                 existingProduct.setCategory(updatedProduct.getCategory());
-                existingProduct.setStock(updatedProduct.getStock());
-                existingProduct.setActive(updatedProduct.getActive());
+                existingProduct.setImageUrl(updatedProduct.getImageUrl());
+                existingProduct.setRating(updatedProduct.getRating());
+                existingProduct.setSpecifications(updatedProduct.getSpecifications());
                 existingProduct.setUpdatedAt(LocalDateTime.now());
                 
                 log.info("Updated product with id: {}", id);
@@ -117,21 +119,14 @@ public class ProductService {
         return removed;
     }
 
-    public List<Product> getProductsByCategory(String category) {
+    public List<Product> searchProducts(String name, String category, Integer minRating, Integer maxRating, BigDecimal minPrice, BigDecimal maxPrice) {
         return products.stream()
-            .filter(product -> category.equalsIgnoreCase(product.getCategory()))
-            .toList();
-    }
-
-    public List<Product> getActiveProducts() {
-        return products.stream()
-            .filter(Product::getActive)
-            .toList();
-    }
-
-    public List<Product> searchProductsByName(String name) {
-        return products.stream()
-            .filter(product -> product.getName().toLowerCase().contains(name.toLowerCase()))
+            .filter(product -> name == null || (product.getName() != null && product.getName().toLowerCase().contains(name.toLowerCase())))
+            .filter(product -> category == null || (product.getCategory() != null && category.equalsIgnoreCase(product.getCategory())))
+            .filter(product -> minRating == null || (product.getRating() != null && product.getRating() >= minRating))
+            .filter(product -> maxRating == null || (product.getRating() != null && product.getRating() <= maxRating))
+            .filter(product -> minPrice == null || (product.getPrice() != null && product.getPrice().compareTo(minPrice) >= 0))
+            .filter(product -> maxPrice == null || (product.getPrice() != null && product.getPrice().compareTo(maxPrice) <= 0))
             .toList();
     }
 }
