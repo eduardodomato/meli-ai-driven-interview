@@ -76,40 +76,81 @@ The Product API provides a comprehensive solution for managing product data with
   - Clean separation of concerns
   - Better user experience with meaningful error messages
 
-#### 3. **Comprehensive Input Validation**
+#### 3. **Repository Pattern Implementation**
+- **Decision**: Separate data access layer using Repository pattern
+- **Rationale**:
+  - Reduces coupling between service and data storage
+  - Enables easy switching between storage mechanisms
+  - Improves testability with mockable interfaces
+  - Follows SOLID principles and clean architecture
+- **Implementation**:
+  - `ProductRepository` interface abstracts data operations
+  - `ProductRepositoryImpl` handles JSON file persistence
+  - Service layer delegates all data access to repository
+- **Benefits**:
+  - Clear separation of concerns
+  - Easy to implement database or other storage solutions
+  - Better testability with isolated layers
+
+#### 4. **Comprehensive Input Validation**
 - **Decision**: Multi-layer validation approach
 - **Implementation**:
   - Bean Validation annotations on model classes
   - Business logic validation in controller layer
-  - Null safety checks in service layer
+  - Null safety checks in repository layer
 - **Benefits**:
   - Data integrity assurance
   - Clear error messages for API consumers
   - Prevention of runtime errors
 
-#### 4. **Flexible Search Implementation**
+#### 5. **Flexible Search Implementation**
 - **Decision**: Optional query parameters with multiple criteria
 - **Rationale**:
   - Supports various use cases (simple name search, complex filtering)
   - Backward compatible (all parameters optional)
   - Easy to extend with additional criteria
-- **Implementation**: Stream-based filtering with null safety
+- **Implementation**: Stream-based filtering with null safety in repository layer
 
-#### 5. **Null Safety Strategy**
+#### 6. **Null Safety Strategy**
 - **Decision**: Defensive programming with explicit null checks
 - **Rationale**:
   - Prevents `NullPointerException` crashes
   - Handles malformed or incomplete data gracefully
   - Improves application reliability
-- **Implementation**: Null checks in search filters and data processing
+- **Implementation**: Null checks in repository search filters and data processing
 
-#### 6. **API Documentation First**
+#### 7. **API Documentation First**
 - **Decision**: Comprehensive OpenAPI documentation
 - **Rationale**:
   - Improves developer experience
   - Enables easy testing and integration
   - Self-documenting API
   - Reduces integration time
+
+#### 8. **Race Condition Handling in Update Operations**
+- **Decision**: Graceful handling of concurrent modification scenarios
+- **Problem**: Race condition where product exists during `existsById()` check but is deleted before `update()` call
+- **Solution**: Catch `IllegalArgumentException` from repository and return `Optional.empty()`
+- **Rationale**:
+  - Maintains API contract consistency (returns `Optional<Product>`)
+  - Provides semantically correct HTTP 404 response to clients
+  - Preserves graceful degradation without breaking existing client code
+  - Logs the race condition for debugging purposes
+- **Trade-offs**: 
+  - Client doesn't know the specific reason for failure (race condition vs. non-existent product)
+  - Debugging requires log analysis to identify concurrent modification issues
+
+#### 9. **Service Layer Design - No Interface Pattern**
+- **Decision**: Direct dependency on concrete service classes without interfaces
+- **Rationale**:
+  - Follows KISS principle (Keep It Simple, Stupid)
+  - Aligns with Spring Boot philosophy of convention over configuration
+  - Avoids YAGNI violation (You Aren't Gonna Need It) - no multiple implementations needed
+  - Reduces complexity and maintenance overhead
+- **Trade-offs**:
+  - Less flexibility for future multiple implementations
+  - Slightly tighter coupling between controller and service layers
+  - Still maintains excellent testability through Spring's dependency injection
 
 ### Project Structure
 ```
@@ -118,12 +159,16 @@ product-api/
 │   ├── controller/          # REST controllers
 │   ├── model/              # Data models and entities
 │   ├── service/            # Business logic layer
+│   ├── repository/         # Data access layer (Repository pattern)
 │   ├── exception/          # Exception handling
 │   └── ProductApiApplication.java
 ├── src/main/resources/
 │   ├── application.yml     # Configuration
 │   └── products.json       # Sample data
 ├── src/test/java/          # Test classes
+│   ├── controller/         # Controller tests
+│   ├── service/            # Service layer tests
+│   └── repository/         # Repository layer tests
 ├── docs/                   # Documentation
 └── pom.xml                 # Maven configuration
 ```
@@ -257,14 +302,15 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🏷️ Version History
 
-- **v0.0.1-SNAPSHOT** - Initial release with core CRUD operations and search functionality
+- **v0.0.1-SNAPSHOT** - Initial release with core CRUD operations, search functionality, and repository pattern implementation
 
 ## 🔮 Roadmap
 
-- [ ] Database integration (PostgreSQL/MySQL)
+- [x] Repository pattern implementation for reduced coupling
+- [ ] Database integration (PostgreSQL/MySQL) - Repository pattern enables easy migration
 - [ ] Authentication and authorization
 - [ ] Rate limiting and API throttling
-- [ ] Caching implementation (Redis)
+- [ ] Caching implementation (Redis) - Can be added as repository decorator
 - [ ] Docker containerization
 - [ ] Kubernetes deployment manifests
 - [ ] Metrics and monitoring (Prometheus/Grafana)
@@ -279,4 +325,4 @@ For questions, issues, or contributions:
 
 ---
 
-**Built with ❤️ using Spring Boot and modern Java practices**
+**Built with dedication, using Spring Boot and modern Java practices**
