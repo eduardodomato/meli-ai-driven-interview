@@ -1,0 +1,282 @@
+# Product API
+
+A robust RESTful API for managing product entities, built with Spring Boot and designed for scalability, maintainability, and developer experience.
+
+[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.java.net/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.0-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Maven](https://img.shields.io/badge/Maven-3.6+-blue.svg)](https://maven.apache.org/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+## 🚀 Overview
+
+The Product API provides a comprehensive solution for managing product data with advanced search capabilities, robust validation, and comprehensive error handling. Built with modern Java technologies and following RESTful design principles.
+
+### Key Features
+
+- **CRUD Operations** - Complete Create, Read, Update, Delete functionality
+- **Advanced Search** - Flexible search with multiple criteria (name, category, rating, price ranges)
+- **Data Validation** - Comprehensive input validation with detailed error messages
+- **Exception Handling** - Centralized error handling with consistent API responses
+- **API Documentation** - Interactive Swagger UI for easy testing and integration
+- **JSON Persistence** - File-based data storage for simplicity and portability
+- **Null Safety** - Robust handling of null values to prevent runtime errors
+
+## 📋 API Endpoints
+
+### Product Management
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/products` | Retrieve all products |
+| `GET` | `/api/products/{id}` | Get product by ID |
+| `POST` | `/api/products` | Create a new product |
+| `PUT` | `/api/products/{id}` | Update an existing product |
+| `DELETE` | `/api/products/{id}` | Delete a product |
+
+### Product Search
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/products/search` | Search products with flexible criteria |
+
+**Search Parameters:**
+- `name` - Search by product name (case-insensitive)
+- `category` - Filter by product category
+- `minRating` / `maxRating` - Filter by rating range (1-5)
+- `minPrice` / `maxPrice` - Filter by price range
+
+### API Documentation
+- **Swagger UI**: `http://localhost:8080/api/swagger-ui.html`
+- **OpenAPI Spec**: `http://localhost:8080/api/api-docs`
+
+## 🏗️ Architecture & Design Decisions
+
+### Technology Stack
+- **Framework**: Spring Boot 3.2.0 with Java 21
+- **Build Tool**: Maven
+- **Documentation**: SpringDoc OpenAPI 3 (Swagger)
+- **Validation**: Jakarta Bean Validation
+- **Logging**: SLF4J with Logback
+- **Data Format**: JSON
+
+### Architectural Decisions
+
+#### 1. **JSON File Persistence**
+- **Decision**: Use JSON file instead of a database
+- **Rationale**: 
+  - Simplifies deployment and setup
+  - Eliminates database dependencies
+  - Perfect for development and testing
+  - Easy data portability and backup
+- **Trade-offs**: Not suitable for high-concurrency production scenarios
+
+#### 2. **Centralized Exception Handling**
+- **Decision**: Implement `@ControllerAdvice` for global exception handling
+- **Rationale**:
+  - Consistent error responses across all endpoints
+  - Centralized error logging and monitoring
+  - Clean separation of concerns
+  - Better user experience with meaningful error messages
+
+#### 3. **Comprehensive Input Validation**
+- **Decision**: Multi-layer validation approach
+- **Implementation**:
+  - Bean Validation annotations on model classes
+  - Business logic validation in controller layer
+  - Null safety checks in service layer
+- **Benefits**:
+  - Data integrity assurance
+  - Clear error messages for API consumers
+  - Prevention of runtime errors
+
+#### 4. **Flexible Search Implementation**
+- **Decision**: Optional query parameters with multiple criteria
+- **Rationale**:
+  - Supports various use cases (simple name search, complex filtering)
+  - Backward compatible (all parameters optional)
+  - Easy to extend with additional criteria
+- **Implementation**: Stream-based filtering with null safety
+
+#### 5. **Null Safety Strategy**
+- **Decision**: Defensive programming with explicit null checks
+- **Rationale**:
+  - Prevents `NullPointerException` crashes
+  - Handles malformed or incomplete data gracefully
+  - Improves application reliability
+- **Implementation**: Null checks in search filters and data processing
+
+#### 6. **API Documentation First**
+- **Decision**: Comprehensive OpenAPI documentation
+- **Rationale**:
+  - Improves developer experience
+  - Enables easy testing and integration
+  - Self-documenting API
+  - Reduces integration time
+
+### Project Structure
+```
+product-api/
+├── src/main/java/com/example/productapi/
+│   ├── controller/          # REST controllers
+│   ├── model/              # Data models and entities
+│   ├── service/            # Business logic layer
+│   ├── exception/          # Exception handling
+│   └── ProductApiApplication.java
+├── src/main/resources/
+│   ├── application.yml     # Configuration
+│   └── products.json       # Sample data
+├── src/test/java/          # Test classes
+├── docs/                   # Documentation
+└── pom.xml                 # Maven configuration
+```
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Java 21 or higher
+- Maven 3.6 or higher
+
+### Installation & Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd product-api
+   ```
+
+2. **Build the application**
+   ```bash
+   mvn clean compile
+   ```
+
+3. **Run tests**
+   ```bash
+   mvn test
+   ```
+
+4. **Start the application**
+   ```bash
+   mvn spring-boot:run
+   ```
+
+5. **Access the API**
+   - Base URL: `http://localhost:8080/api`
+   - Swagger UI: `http://localhost:8080/api/swagger-ui.html`
+
+### Sample Usage
+
+**Get all products:**
+```bash
+curl -X GET "http://localhost:8080/api/products"
+```
+
+**Create a new product:**
+```bash
+curl -X POST "http://localhost:8080/api/products" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Gaming Laptop",
+    "description": "High-performance gaming laptop",
+    "price": 1999.99,
+    "category": "Electronics",
+    "rating": 5
+  }'
+```
+
+**Search products:**
+```bash
+curl -X GET "http://localhost:8080/api/products/search?category=Electronics&minRating=4"
+```
+
+## 📚 Documentation
+
+- **[Setup & Run Guide](docs/run.md)** - Detailed instructions for running the application
+- **[Project Plan](docs/project-plan.md)** - Development roadmap and milestones
+- **[API Prompts](docs/prompts.md)** - Development prompts and requirements
+
+## 🧪 Testing
+
+The project includes comprehensive test coverage:
+
+- **Unit Tests**: Service layer and exception handling
+- **Integration Tests**: Controller endpoints
+- **Null Safety Tests**: Specific tests for null handling scenarios
+
+Run tests with:
+```bash
+mvn test
+```
+
+## 🔧 Configuration
+
+### Application Properties
+Key configuration options in `application.yml`:
+
+```yaml
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+app:
+  data:
+    file: classpath:products.json
+
+logging:
+  level:
+    com.example.productapi: DEBUG
+```
+
+### Environment Variables
+Override configuration using environment variables:
+- `SERVER_PORT` - Application port
+- `APP_DATA_FILE` - Data file path
+
+## 🚀 Deployment
+
+### Development
+```bash
+mvn spring-boot:run
+```
+
+### Production
+```bash
+mvn clean package
+java -jar target/product-api-0.0.1-SNAPSHOT.jar
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🏷️ Version History
+
+- **v0.0.1-SNAPSHOT** - Initial release with core CRUD operations and search functionality
+
+## 🔮 Roadmap
+
+- [ ] Database integration (PostgreSQL/MySQL)
+- [ ] Authentication and authorization
+- [ ] Rate limiting and API throttling
+- [ ] Caching implementation (Redis)
+- [ ] Docker containerization
+- [ ] Kubernetes deployment manifests
+- [ ] Metrics and monitoring (Prometheus/Grafana)
+- [ ] API versioning strategy
+
+## 📞 Support
+
+For questions, issues, or contributions:
+- Create an issue in the repository
+- Check the [documentation](docs/) for detailed guides
+- Review the [API documentation](http://localhost:8080/api/swagger-ui.html) when running locally
+
+---
+
+**Built with ❤️ using Spring Boot and modern Java practices**
