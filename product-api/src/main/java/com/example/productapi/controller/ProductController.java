@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -65,7 +66,7 @@ public class ProductController {
         @ApiResponse(responseCode = "201", description = "Product created successfully"),
         @ApiResponse(responseCode = "400", description = "Invalid product data")
     })
-    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
+    public ResponseEntity<Product> createProduct(@Valid @RequestBody Product product) {
         log.info("Creating new product: {}", product.getName());
         Product createdProduct = productService.createProduct(product);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdProduct);
@@ -80,7 +81,7 @@ public class ProductController {
     })
     public ResponseEntity<Product> updateProduct(
             @Parameter(description = "Product ID") @PathVariable Long id,
-            @RequestBody Product product) {
+            @Valid @RequestBody Product product) {
         log.info("Updating product with id: {}", id);
         Optional<Product> updatedProduct = productService.updateProduct(id, product);
         return updatedProduct.map(ResponseEntity::ok)
@@ -106,6 +107,7 @@ public class ProductController {
     @Operation(summary = "Search products with flexible criteria", description = "Search for products using multiple optional criteria including name, category, rating range, and price range")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Products found"),
+        @ApiResponse(responseCode = "400", description = "Invalid search parameters"),
         @ApiResponse(responseCode = "404", description = "No products found matching criteria")
     })
     public ResponseEntity<List<Product>> searchProducts(
@@ -115,6 +117,28 @@ public class ProductController {
             @Parameter(description = "Maximum rating (1-5)") @RequestParam(required = false) Integer maxRating,
             @Parameter(description = "Minimum price") @RequestParam(required = false) BigDecimal minPrice,
             @Parameter(description = "Maximum price") @RequestParam(required = false) BigDecimal maxPrice) {
+        
+        // Validate rating range
+        if (minRating != null && (minRating < 1 || minRating > 5)) {
+            throw new IllegalArgumentException("Minimum rating must be between 1 and 5");
+        }
+        if (maxRating != null && (maxRating < 1 || maxRating > 5)) {
+            throw new IllegalArgumentException("Maximum rating must be between 1 and 5");
+        }
+        if (minRating != null && maxRating != null && minRating > maxRating) {
+            throw new IllegalArgumentException("Minimum rating cannot be greater than maximum rating");
+        }
+        
+        // Validate price range
+        if (minPrice != null && minPrice.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Minimum price cannot be negative");
+        }
+        if (maxPrice != null && maxPrice.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Maximum price cannot be negative");
+        }
+        if (minPrice != null && maxPrice != null && minPrice.compareTo(maxPrice) > 0) {
+            throw new IllegalArgumentException("Minimum price cannot be greater than maximum price");
+        }
         
         log.info("Searching products with criteria - name: {}, category: {}, minRating: {}, maxRating: {}, minPrice: {}, maxPrice: {}", 
                 name, category, minRating, maxRating, minPrice, maxPrice);

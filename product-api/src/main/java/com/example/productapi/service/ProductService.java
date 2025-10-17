@@ -121,8 +121,8 @@ public class ProductService {
 
     public List<Product> searchProducts(String name, String category, Integer minRating, Integer maxRating, BigDecimal minPrice, BigDecimal maxPrice) {
         return products.stream()
-            .filter(product -> name == null || product.getName().toLowerCase().contains(name.toLowerCase()))
-            .filter(product -> category == null || category.equalsIgnoreCase(product.getCategory()))
+            .filter(product -> name == null || (product.getName() != null && product.getName().toLowerCase().contains(name.toLowerCase())))
+            .filter(product -> category == null || (product.getCategory() != null && category.equalsIgnoreCase(product.getCategory())))
             .filter(product -> minRating == null || (product.getRating() != null && product.getRating() >= minRating))
             .filter(product -> maxRating == null || (product.getRating() != null && product.getRating() <= maxRating))
             .filter(product -> minPrice == null || (product.getPrice() != null && product.getPrice().compareTo(minPrice) >= 0))
