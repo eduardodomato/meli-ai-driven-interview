@@ -76,34 +76,50 @@ The Product API provides a comprehensive solution for managing product data with
   - Clean separation of concerns
   - Better user experience with meaningful error messages
 
-#### 3. **Comprehensive Input Validation**
+#### 3. **Repository Pattern Implementation**
+- **Decision**: Separate data access layer using Repository pattern
+- **Rationale**:
+  - Reduces coupling between service and data storage
+  - Enables easy switching between storage mechanisms
+  - Improves testability with mockable interfaces
+  - Follows SOLID principles and clean architecture
+- **Implementation**:
+  - `ProductRepository` interface abstracts data operations
+  - `ProductRepositoryImpl` handles JSON file persistence
+  - Service layer delegates all data access to repository
+- **Benefits**:
+  - Clear separation of concerns
+  - Easy to implement database or other storage solutions
+  - Better testability with isolated layers
+
+#### 4. **Comprehensive Input Validation**
 - **Decision**: Multi-layer validation approach
 - **Implementation**:
   - Bean Validation annotations on model classes
   - Business logic validation in controller layer
-  - Null safety checks in service layer
+  - Null safety checks in repository layer
 - **Benefits**:
   - Data integrity assurance
   - Clear error messages for API consumers
   - Prevention of runtime errors
 
-#### 4. **Flexible Search Implementation**
+#### 5. **Flexible Search Implementation**
 - **Decision**: Optional query parameters with multiple criteria
 - **Rationale**:
   - Supports various use cases (simple name search, complex filtering)
   - Backward compatible (all parameters optional)
   - Easy to extend with additional criteria
-- **Implementation**: Stream-based filtering with null safety
+- **Implementation**: Stream-based filtering with null safety in repository layer
 
-#### 5. **Null Safety Strategy**
+#### 6. **Null Safety Strategy**
 - **Decision**: Defensive programming with explicit null checks
 - **Rationale**:
   - Prevents `NullPointerException` crashes
   - Handles malformed or incomplete data gracefully
   - Improves application reliability
-- **Implementation**: Null checks in search filters and data processing
+- **Implementation**: Null checks in repository search filters and data processing
 
-#### 6. **API Documentation First**
+#### 7. **API Documentation First**
 - **Decision**: Comprehensive OpenAPI documentation
 - **Rationale**:
   - Improves developer experience
@@ -118,12 +134,16 @@ product-api/
 │   ├── controller/          # REST controllers
 │   ├── model/              # Data models and entities
 │   ├── service/            # Business logic layer
+│   ├── repository/         # Data access layer (Repository pattern)
 │   ├── exception/          # Exception handling
 │   └── ProductApiApplication.java
 ├── src/main/resources/
 │   ├── application.yml     # Configuration
 │   └── products.json       # Sample data
 ├── src/test/java/          # Test classes
+│   ├── controller/         # Controller tests
+│   ├── service/            # Service layer tests
+│   └── repository/         # Repository layer tests
 ├── docs/                   # Documentation
 └── pom.xml                 # Maven configuration
 ```
@@ -257,14 +277,15 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🏷️ Version History
 
-- **v0.0.1-SNAPSHOT** - Initial release with core CRUD operations and search functionality
+- **v0.0.1-SNAPSHOT** - Initial release with core CRUD operations, search functionality, and repository pattern implementation
 
 ## 🔮 Roadmap
 
-- [ ] Database integration (PostgreSQL/MySQL)
+- [x] Repository pattern implementation for reduced coupling
+- [ ] Database integration (PostgreSQL/MySQL) - Repository pattern enables easy migration
 - [ ] Authentication and authorization
 - [ ] Rate limiting and API throttling
-- [ ] Caching implementation (Redis)
+- [ ] Caching implementation (Redis) - Can be added as repository decorator
 - [ ] Docker containerization
 - [ ] Kubernetes deployment manifests
 - [ ] Metrics and monitoring (Prometheus/Grafana)
