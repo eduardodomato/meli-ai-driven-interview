@@ -112,15 +112,16 @@ public class ProductController {
                                  : ResponseEntity.ok(products);
     }
 
-    @GetMapping("/active")
-    @Operation(summary = "Get active products", description = "Retrieve all active products")
+    @GetMapping("/rating/{minRating}")
+    @Operation(summary = "Get products by minimum rating", description = "Retrieve all products with rating greater than or equal to the specified minimum rating")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Active products found"),
-        @ApiResponse(responseCode = "404", description = "No active products found")
+        @ApiResponse(responseCode = "200", description = "Products found"),
+        @ApiResponse(responseCode = "404", description = "No products found with the specified rating")
     })
-    public ResponseEntity<List<Product>> getActiveProducts() {
-        log.info("Getting all active products");
-        List<Product> products = productService.getActiveProducts();
+    public ResponseEntity<List<Product>> getProductsByRating(
+            @Parameter(description = "Minimum rating (1-5)") @PathVariable Integer minRating) {
+        log.info("Getting products with minimum rating: {}", minRating);
+        List<Product> products = productService.getProductsByRating(minRating);
         return products.isEmpty() ? ResponseEntity.notFound().build() 
                                  : ResponseEntity.ok(products);
     }

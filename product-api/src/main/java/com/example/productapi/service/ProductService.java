@@ -86,10 +86,6 @@ public class ProductService {
         product.setCreatedAt(LocalDateTime.now());
         product.setUpdatedAt(LocalDateTime.now());
         
-        if (product.getActive() == null) {
-            product.setActive(true);
-        }
-        
         products.add(product);
         log.info("Created product with id: {}", product.getId());
         return product;
@@ -104,8 +100,9 @@ public class ProductService {
                 existingProduct.setDescription(updatedProduct.getDescription());
                 existingProduct.setPrice(updatedProduct.getPrice());
                 existingProduct.setCategory(updatedProduct.getCategory());
-                existingProduct.setStock(updatedProduct.getStock());
-                existingProduct.setActive(updatedProduct.getActive());
+                existingProduct.setImageUrl(updatedProduct.getImageUrl());
+                existingProduct.setRating(updatedProduct.getRating());
+                existingProduct.setSpecifications(updatedProduct.getSpecifications());
                 existingProduct.setUpdatedAt(LocalDateTime.now());
                 
                 log.info("Updated product with id: {}", id);
@@ -127,9 +124,9 @@ public class ProductService {
             .toList();
     }
 
-    public List<Product> getActiveProducts() {
+    public List<Product> getProductsByRating(Integer minRating) {
         return products.stream()
-            .filter(Product::getActive)
+            .filter(product -> product.getRating() != null && product.getRating() >= minRating)
             .toList();
     }
 

@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 /**
  * Product entity representing a product in the system
@@ -20,18 +21,20 @@ public class Product {
     private String description;
     private BigDecimal price;
     private String category;
-    private Integer stock;
-    private Boolean active;
+    private String imageUrl;
+    private Integer rating;
+    private Map<String, String> specifications;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     
-    public Product(String name, String description, BigDecimal price, String category, Integer stock) {
+    public Product(String name, String description, BigDecimal price, String category, String imageUrl, Integer rating, Map<String, String> specifications) {
         this.name = name;
         this.description = description;
         this.price = price;
         this.category = category;
-        this.stock = stock;
-        this.active = true;
+        this.imageUrl = imageUrl;
+        this.rating = rating;
+        this.specifications = specifications;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
