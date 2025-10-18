@@ -92,6 +92,12 @@ Once the application is running, you can access the following endpoints:
 - **Swagger UI:** `http://localhost:8080/api/swagger-ui.html`
 - **OpenAPI JSON:** `http://localhost:8080/api/api-docs`
 
+#### Monitoring and Health Checks (Actuator)
+- **Health Check:** `http://localhost:8080/api/actuator/health`
+- **Application Info:** `http://localhost:8080/api/actuator/info`
+- **Metrics:** `http://localhost:8080/api/actuator/metrics`
+- **Environment:** `http://localhost:8080/api/actuator/env`
+
 ## Testing the Application
 
 ### 1. Using Swagger UI (Easiest Method)
@@ -141,7 +147,34 @@ curl -X GET "http://localhost:8080/api/products/search?minRating=4&maxRating=5"
 curl -X GET "http://localhost:8080/api/products/search?minPrice=100&maxPrice=1000"
 ```
 
-### 3. Using Postman
+### 3. Testing Actuator Endpoints
+
+**Health Check:**
+```bash
+curl -X GET "http://localhost:8080/api/actuator/health"
+```
+
+**Application Info:**
+```bash
+curl -X GET "http://localhost:8080/api/actuator/info"
+```
+
+**Available Metrics:**
+```bash
+curl -X GET "http://localhost:8080/api/actuator/metrics"
+```
+
+**Specific Metric (e.g., product operations):**
+```bash
+curl -X GET "http://localhost:8080/api/actuator/metrics/product.operations.created"
+```
+
+**Environment Configuration:**
+```bash
+curl -X GET "http://localhost:8080/api/actuator/env"
+```
+
+### 4. Using Postman
 1. Import the OpenAPI specification from: `http://localhost:8080/api/api-docs`
 2. Create requests for each endpoint
 3. Test the API functionality
@@ -272,6 +305,37 @@ java -jar target/product-api-0.0.1-SNAPSHOT.jar
 }
 ```
 
+## Monitoring and Metrics
+
+The application includes Spring Boot Actuator for monitoring and observability:
+
+### Custom Business Metrics
+The application tracks the following business operations:
+- **product.operations.created** - Total products created
+- **product.operations.updated** - Total products updated
+- **product.operations.deleted** - Total products deleted
+- **product.operations.retrieved** - Total products retrieved
+- **product.operations.search** - Total search operations
+
+### How to Monitor Metrics
+1. **Make API calls** to increment the counters
+2. **Check metrics** at `/api/actuator/metrics`
+3. **View specific metrics** like `/api/actuator/metrics/product.operations.created`
+4. **Monitor health** at `/api/actuator/health`
+
+### Example Monitoring Workflow
+```bash
+# 1. Check initial metrics
+curl -X GET "http://localhost:8080/api/actuator/metrics/product.operations.retrieved"
+
+# 2. Make API calls to increment counters
+curl -X GET "http://localhost:8080/api/products"
+curl -X GET "http://localhost:8080/api/products/1"
+
+# 3. Check updated metrics
+curl -X GET "http://localhost:8080/api/actuator/metrics/product.operations.retrieved"
+```
+
 ## Next Steps
 
 Once you have the application running:
@@ -280,7 +344,9 @@ Once you have the application running:
 2. **Test all endpoints** to understand the functionality
 3. **Try different search combinations** to see the flexible search capabilities
 4. **Create your own products** and test the CRUD operations
-5. **Check the logs** to understand how the application works internally
+5. **Monitor metrics** to see business operation tracking in action
+6. **Check the logs** to understand how the application works internally
+7. **Test health endpoints** to verify application monitoring capabilities
 
 ## Support
 

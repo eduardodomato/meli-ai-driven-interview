@@ -101,3 +101,13 @@ Generate the two required documentation files.
 | :--- | :--- |
 | **5.1 README.md** | `Generate a **README.md** file for the 'product-api' project. It must include sections for: **API Overview**, **Endpoints** (list the main paths and methods), **Architectural Details** (mentioning the simple **Controller-Service-Repository** layers and JSON persistence), and **Setup Instructions** (detailing dependencies, Java version, and build steps).` |
 | **5.2 run.md** | `Generate a separate file named **run.md**. This file must provide **detailed, step-by-step instructions** on how to **build** and **run** the Spring Boot application locally using **Maven** commands and accessing the Swagger UI at the default port (8080).` |
+
+---
+
+## 6. Spring Boot Actuator setup
+
+Configure Actuator endpoints to expose health, info, metrics, and environment details, enhancing observability and monitoring capabilities.
+
+| Step | Prompt |
+| :--- | :--- |
+| **6.1 Configure Actuator** | `Learn from all the previous failures, then make a plan divided in phases to implementing the actuator feature, like: fase 1 analize project structure, dependency tree, dependency compatibilities to choose the exact versions, fase 2 implement the built in actuator features only, no custom metrics at all, fase 3 implement only simple counting metrics in the service, no timmer, no JSON metrics. Moving from one phase to the next requires explicit approval from me, because I want to test each phase from my end.` |

@@ -18,6 +18,8 @@ The Product API provides a comprehensive solution for managing product data with
 - **Data Validation** - Comprehensive input validation with detailed error messages
 - **Exception Handling** - Centralized error handling with consistent API responses
 - **API Documentation** - Interactive Swagger UI for easy testing and integration
+- **Health Monitoring** - Spring Boot Actuator endpoints for application health and metrics
+- **Performance Metrics** - Custom metrics tracking for business operations and performance monitoring
 - **JSON Persistence** - File-based data storage been required for simplicity, I consider an in-memory DB a better option (H2 for example)
 - **Null Safety** - Robust handling of null values to prevent runtime errors
 
@@ -47,6 +49,12 @@ The Product API provides a comprehensive solution for managing product data with
 - **Swagger UI**: `http://localhost:8080/api/swagger-ui.html`
 - **OpenAPI Spec**: `http://localhost:8080/api/api-docs`
 
+### Monitoring and Health Checks
+- **Health Check**: `http://localhost:8080/api/actuator/health`
+- **Application Info**: `http://localhost:8080/api/actuator/info`
+- **Metrics**: `http://localhost:8080/api/actuator/metrics`
+- **Environment**: `http://localhost:8080/api/actuator/env`
+
 ## 🏗️ Architecture & Design Decisions
 
 ### Technology Stack
@@ -55,6 +63,7 @@ The Product API provides a comprehensive solution for managing product data with
 - **Documentation**: SpringDoc OpenAPI 3 (Swagger)
 - **Validation**: Jakarta Bean Validation
 - **Logging**: SLF4J with Logback
+- **Monitoring**: Spring Boot Actuator with Micrometer
 - **Data Format**: JSON
 
 ### Architectural Decisions
@@ -173,6 +182,29 @@ The Product API provides a comprehensive solution for managing product data with
   - Requires updating tests to work with both Entity and DTO types
   - **Records are immutable by default, which may require more careful handling in update scenarios**
 
+#### 11. **Spring Boot Actuator Integration**
+- **Decision**: Implement Spring Boot Actuator for production monitoring and observability
+- **Problem**: Need production-ready health checks, metrics, and monitoring capabilities
+- **Solution**:
+  - Custom `ProductMetrics` tracks business operations (CRUD, search performance)
+  - Expose essential endpoints (health, info, metrics, env) for operational monitoring
+  - Lazy initialization pattern for metrics to ensure test compatibility
+- **Rationale**:
+  - **Production Readiness**: Essential for container orchestration and load balancer health checks
+  - **Operational Visibility**: Provides insights into application performance and business metrics
+  - **Debugging Support**: Environment and configuration inspection capabilities
+  - **Future Integration**: Ready for Prometheus/Grafana monitoring stack mentioned in roadmap
+  - **Business Intelligence**: Custom metrics track usage patterns and operation volumes
+- **Implementation**:
+  - Metrics track operation counts for all business operations (create, read, update, delete, search)
+  - Health indicators monitor application status and component health
+  - Secure endpoint exposure with appropriate access controls
+  - Test-friendly design with lazy initialization to prevent context loading issues
+- **Trade-offs**:
+  - Additional dependency and configuration complexity
+  - Metrics collection has minimal performance overhead
+  - Requires proper security configuration in production environments
+
 ### Project Structure
 ```
 product-api/
@@ -184,6 +216,7 @@ product-api/
 │   ├── service/            # Business logic layer
 │   ├── repository/         # Data access layer (Repository pattern)
 │   ├── exception/          # Exception handling
+│   ├── metrics/            # Custom metrics and monitoring
 │   └── ProductApiApplication.java
 ├── src/main/resources/
 │   ├── application.yml     # Configuration
@@ -228,6 +261,8 @@ product-api/
 5. **Access the API**
    - Base URL: `http://localhost:8080/api`
    - Swagger UI: `http://localhost:8080/api/swagger-ui.html`
+   - Health Check: `http://localhost:8080/api/actuator/health`
+   - Metrics: `http://localhost:8080/api/actuator/metrics`
 
 ### Sample Usage
 
@@ -252,6 +287,21 @@ curl -X POST "http://localhost:8080/api/products" \
 **Search products:**
 ```bash
 curl -X GET "http://localhost:8080/api/products/search?category=Electronics&minRating=4"
+```
+
+**Check application health:**
+```bash
+curl -X GET "http://localhost:8080/api/actuator/health"
+```
+
+**View application metrics:**
+```bash
+curl -X GET "http://localhost:8080/api/actuator/metrics"
+```
+
+**View specific business metric:**
+```bash
+curl -X GET "http://localhost:8080/api/actuator/metrics/product.operations.created"
 ```
 
 ## 📚 Documentation
@@ -330,13 +380,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🔮 Roadmap
 
 - [x] Repository pattern implementation for reduced coupling
+- [x] Metrics and monitoring (Spring Boot Actuator) - Custom health indicators and business metrics implemented
 - [ ] Database integration (PostgreSQL/MySQL) - Repository pattern enables easy migration and JPA/Hibernate adoption
 - [ ] Authentication and authorization (JWT)
 - [ ] Rate limiting and API throttling
 - [ ] Caching implementation (Redis) - Can be added as repository decorator
 - [ ] Docker containerization
 - [ ] Kubernetes deployment manifests
-- [ ] Metrics and monitoring (Prometheus/Grafana)
+- [ ] Prometheus/Grafana integration for advanced monitoring dashboards
 - [ ] API versioning strategy
 
 ## 📞 Support

@@ -38,7 +38,7 @@ class GlobalExceptionHandlerTest {
     @Test
     void testHandleNullPointerException() {
         // Given
-        NullPointerException ex = new NullPointerException("Test null pointer");
+        NullPointerException ex = new NullPointerException("#### TEST NULL POINTER EXCEPTION ####");
 
         // When
         ResponseEntity<ErrorResponse> response = exceptionHandler.handleNullPointer(ex);

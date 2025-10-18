@@ -2,6 +2,7 @@ package com.example.productapi.service;
 
 import com.example.productapi.dto.ProductDTO;
 import com.example.productapi.mapper.ProductMapper;
+import com.example.productapi.metrics.ProductMetrics;
 import com.example.productapi.model.Product;
 import com.example.productapi.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,16 +25,21 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
+    private final ProductMetrics productMetrics;
 
     public List<ProductDTO> getAllProducts() {
         log.info("Retrieving all products");
         List<Product> products = productRepository.findAll();
+        productMetrics.recordProductRetrieved();
         return productMapper.toDTOList(products);
     }
 
     public Optional<ProductDTO> getProductById(Long id) {
         log.info("Retrieving product with id: {}", id);
         Optional<Product> product = productRepository.findById(id);
+        if (product.isPresent()) {
+            productMetrics.recordProductRetrieved();
+        }
         return productMapper.toDTOOptional(product);
     }
 
@@ -41,6 +47,7 @@ public class ProductService {
         log.info("Creating new product: {}", productDTO.name());
         Product product = productMapper.toEntity(productDTO);
         Product savedProduct = productRepository.save(product);
+        productMetrics.recordProductCreated();
         return productMapper.toDTO(savedProduct);
     }
 
@@ -62,6 +69,7 @@ public class ProductService {
         
         try {
             Product savedProduct = productRepository.update(existingProduct);
+            productMetrics.recordProductUpdated();
             return Optional.of(productMapper.toDTO(savedProduct));
         } catch (IllegalArgumentException e) {
             // Handle race condition: product was deleted between existsById() check and update() call
@@ -72,7 +80,11 @@ public class ProductService {
 
     public boolean deleteProduct(Long id) {
         log.info("Deleting product with id: {}", id);
-        return productRepository.deleteById(id);
+        boolean deleted = productRepository.deleteById(id);
+        if (deleted) {
+            productMetrics.recordProductDeleted();
+        }
+        return deleted;
     }
 
     public List<ProductDTO> searchProducts(String name, String category, Integer minRating, Integer maxRating, BigDecimal minPrice, BigDecimal maxPrice) {
@@ -80,6 +92,7 @@ public class ProductService {
                 name, category, minRating, maxRating, minPrice, maxPrice);
         
         List<Product> products = productRepository.search(name, category, minRating, maxRating, minPrice, maxPrice);
+        productMetrics.recordSearchOperation(category, minRating, minPrice);
         return productMapper.toDTOList(products);
     }
 }
