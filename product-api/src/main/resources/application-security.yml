@@ -1,0 +1,18 @@
+# Security profile configuration
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080/api/auth}
+
+# JWT Configuration
+jwt:
+  secret: ${JWT_SECRET:mySecretKeyForLocalDevelopment}
+  expiration: ${JWT_EXPIRATION:86400000} # 24 hours
+
+# Security logging
+logging:
+  level:
+    com.example.productapi.security: DEBUG
+    org.springframework.security: DEBUG

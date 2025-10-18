@@ -6,6 +6,7 @@ import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest
 @TestPropertySource(properties = {
+    "spring.profiles.active=no-security",
     "management.endpoints.web.exposure.include=health,info,metrics,env",
     "management.endpoint.health.show-details=when-authorized",
     "management.endpoint.info.enabled=true",

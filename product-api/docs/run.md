@@ -105,6 +105,53 @@ If you're using an IDE like IntelliJ IDEA or Eclipse:
 2. Navigate to `ProductApiApplication.java`
 3. Right-click and select "Run ProductApiApplication"
 
+## 🔐 Security Features
+
+The Product API includes comprehensive security features with **Profile-Based Security Implementation**:
+
+### Security Modes
+
+#### **No-Security Mode (Default)**
+- All endpoints are publicly accessible
+- No authentication required
+- Perfect for development and testing
+
+#### **Security Mode**
+- JWT-based authentication
+- Role-based authorization (USER, ADMIN)
+- Protected endpoints with proper access control
+
+### Quick Security Setup
+
+**Run without security (default):**
+```bash
+./mvnw spring-boot:run
+# or
+java -jar target/product-api-0.0.1-SNAPSHOT.jar --spring.profiles.active=no-security
+```
+
+**Run with security:**
+```bash
+java -jar target/product-api-0.0.1-SNAPSHOT.jar --spring.profiles.active=security
+```
+
+### Test Users (Security Mode)
+- **Admin**: `admin` / `admin123` (Full access)
+- **User**: `user` / `user123` (Read-only access)
+
+### Security Endpoints
+- **Login**: `POST /api/auth/login`
+- **User Info**: `GET /api/auth/me`
+- **Token Validation**: `POST /api/auth/validate`
+- **Security Status**: `GET /api/status/security`
+
+### Docker Security
+The Docker setup includes both security modes:
+- **Port 8080**: No Security
+- **Port 8081**: With Security
+
+For detailed security documentation, configuration, and testing instructions, see **[SECURITY.md](../SECURITY.md)**.
+
 ## 🐳 Docker Deployment
 
 The application includes comprehensive Docker support for easy deployment and development.
@@ -129,10 +176,21 @@ docker-compose down
 
 When running with Docker Compose, you get:
 
+#### **No-Security Mode (Port 8080)**
 - **Product API**: `http://localhost:8080/api`
 - **Swagger UI**: `http://localhost:8080/api/swagger-ui.html`
 - **Health Check**: `http://localhost:8080/api/actuator/health`
-- **Metrics**: `http://localhost:8080/api/actuator/metrics`
+- **Security Status**: `http://localhost:8080/api/status/security`
+
+#### **Security Mode (Port 8081)**
+- **Product API**: `http://localhost:8081/api`
+- **Login Endpoint**: `http://localhost:8081/api/auth/login`
+- **Swagger UI**: `http://localhost:8081/api/swagger-ui.html` (Admin only)
+- **Health Check**: `http://localhost:8081/api/actuator/health`
+- **Security Status**: `http://localhost:8081/api/status/security`
+
+#### **Additional Services**
+- **Metrics**: `http://localhost:8080/api/actuator/metrics` (both modes)
 - **Redis Commander**: `http://localhost:8081` (Web UI for Redis)
 
 ### Docker Commands

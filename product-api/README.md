@@ -22,6 +22,9 @@ The Product API provides a comprehensive solution for managing product data with
 - **Performance Metrics** - Custom metrics tracking for business operations and performance monitoring
 - **JSON Persistence** - File-based data storage been required for simplicity, I consider an in-memory DB a better option (H2 for example)
 - **Null Safety** - Robust handling of null values to prevent runtime errors
+- **🔐 Profile-Based Security** - JWT authentication with role-based authorization (USER, ADMIN)
+- **🔒 Flexible Security Modes** - Run with or without security based on Spring profiles
+- **🛡️ In-Memory User Management** - Built-in test users for development and testing
 
 ## 📋 API Endpoints
 
@@ -45,6 +48,14 @@ The Product API provides a comprehensive solution for managing product data with
 - `minRating` / `maxRating` - Filter by rating range (1-5)
 - `minPrice` / `maxPrice` - Filter by price range
 
+### Security & Authentication
+| Method | Endpoint | Description | Access Level |
+|--------|----------|-------------|--------------|
+| `POST` | `/api/auth/login` | User authentication | Public |
+| `GET` | `/api/auth/me` | Get current user info | Authenticated |
+| `POST` | `/api/auth/validate` | Validate JWT token | Public |
+| `GET` | `/api/status/security` | Security configuration status | Public |
+
 ### API Documentation
 - **Swagger UI**: `http://localhost:8080/api/swagger-ui.html`
 - **OpenAPI Spec**: `http://localhost:8080/api/api-docs`
@@ -64,6 +75,8 @@ The Product API provides a comprehensive solution for managing product data with
 - **Validation**: Jakarta Bean Validation
 - **Logging**: SLF4J with Logback
 - **Monitoring**: Spring Boot Actuator with Micrometer
+- **Security**: Spring Security with JWT (JSON Web Tokens)
+- **Authentication**: In-Memory User Management with BCrypt
 - **Data Format**: JSON
 
 ### Architectural Decisions
@@ -205,6 +218,31 @@ The Product API provides a comprehensive solution for managing product data with
   - Metrics collection has minimal performance overhead
   - Requires proper security configuration in production environments
 
+#### 12. **Profile-Based Security Implementation**
+- **Decision**: Implement flexible security with Spring profiles for easy mode switching
+- **Problem**: Need security for production while maintaining development simplicity
+- **Solution**:
+  - **No-Security Profile**: All endpoints publicly accessible for development
+  - **Security Profile**: JWT authentication with role-based authorization
+  - **Conditional Components**: Security classes only active when security profile is enabled
+  - **In-Memory Users**: Built-in test users (admin/admin123, user/user123)
+- **Rationale**:
+  - **Development Flexibility**: Easy switching between secure and non-secure modes
+  - **Production Ready**: Full JWT authentication and authorization
+  - **Testing Support**: Built-in test users for development and testing
+  - **Zero Configuration**: Works out of the box with sensible defaults
+  - **Future Extensibility**: Easy to add database user management or OAuth2
+- **Implementation**:
+  - `SecurityConfig` with role-based access control (USER vs ADMIN)
+  - `NoSecurityConfig` permits all requests when no-security profile is active
+  - `JwtService` for token generation and validation
+  - `AuthController` with login, user info, and token validation endpoints
+  - `SecurityStatusController` for configuration inspection
+- **Trade-offs**:
+  - Additional complexity with conditional security components
+  - In-memory users not suitable for production scale
+  - Requires proper JWT secret management in production
+
 ### Project Structure
 ```
 product-api/
@@ -217,15 +255,35 @@ product-api/
 │   ├── repository/         # Data access layer (Repository pattern)
 │   ├── exception/          # Exception handling
 │   ├── metrics/            # Custom metrics and monitoring
+│   ├── security/           # Security components (JWT, Auth, Config)
+│   │   ├── dto/            # Security DTOs (LoginRequest, AuthResponse)
+│   │   ├── SecurityConfig.java      # Security configuration
+│   │   ├── NoSecurityConfig.java    # No-security configuration
+│   │   ├── JwtService.java          # JWT token service
+│   │   ├── JwtAuthenticationFilter.java # JWT filter
+│   │   ├── AuthController.java      # Authentication endpoints
+│   │   └── SecurityStatusController.java # Security status
 │   └── ProductApiApplication.java
 ├── src/main/resources/
-│   ├── application.yml     # Configuration
-│   └── products.json       # Sample data
+│   ├── application.yml           # Default configuration (no-security)
+│   ├── application-security.yml  # Security profile configuration
+│   ├── application-docker.yml    # Docker configuration
+│   └── products.json             # Sample data
 ├── src/test/java/          # Test classes
 │   ├── controller/         # Controller tests
 │   ├── service/            # Service layer tests
 │   └── repository/         # Repository layer tests
 ├── docs/                   # Documentation
+│   ├── run.md              # Running instructions
+│   ├── project-plan.md      # Development roadmap
+│   └── prompts.md          # Development prompts
+├── SECURITY.md             # Comprehensive security documentation
+├── docker-compose.yml      # Docker services (both security modes)
+├── docker-compose.prod.yml # Production Docker configuration
+├── run-no-security.bat    # Windows script (no security)
+├── run-with-security.bat  # Windows script (with security)
+├── run-no-security.sh     # Linux/Mac script (no security)
+├── run-with-security.sh   # Linux/Mac script (with security)
 └── pom.xml                 # Maven configuration
 ```
 
@@ -262,22 +320,56 @@ product-api/
    ```
 
 4. **Start the application**
+
+   **Option A: Without Security (Default)**
    ```bash
-   # Using Maven
-   mvn spring-boot:run
-   
    # Using Maven Wrapper (Recommended)
    ./mvnw spring-boot:run
    
-   # Using Docker
+   # Or explicitly
+   java -jar target/product-api-0.0.1-SNAPSHOT.jar --spring.profiles.active=no-security
+   
+   # Using startup script
+   ./run-no-security.sh  # Linux/Mac
+   run-no-security.bat    # Windows
+   ```
+
+   **Option B: With Security**
+   ```bash
+   # Using Maven Wrapper
+   java -jar target/product-api-0.0.1-SNAPSHOT.jar --spring.profiles.active=security
+   
+   # Using startup script
+   ./run-with-security.sh  # Linux/Mac
+   run-with-security.bat    # Windows
+   ```
+
+   **Option C: Using Docker (Both Modes)**
+   ```bash
    docker-compose up -d
+   # Port 8080: No Security
+   # Port 8081: With Security
    ```
 
 5. **Access the API**
+
+   **Without Security (Default):**
    - Base URL: `http://localhost:8080/api`
    - Swagger UI: `http://localhost:8080/api/swagger-ui.html`
    - Health Check: `http://localhost:8080/api/actuator/health`
-   - Metrics: `http://localhost:8080/api/actuator/metrics`
+   - Security Status: `http://localhost:8080/api/status/security`
+
+   **With Security:**
+   - Base URL: `http://localhost:8081/api`
+   - Login: `POST http://localhost:8081/api/auth/login`
+   - Swagger UI: `http://localhost:8081/api/swagger-ui.html` (Admin only)
+   - Health Check: `http://localhost:8081/api/actuator/health`
+   - Security Status: `http://localhost:8081/api/status/security`
+   - **Test Users**: admin/admin123 (ADMIN), user/user123 (USER)
+
+   **Docker (Both Modes):**
+   - No Security: `http://localhost:8080/api`
+   - With Security: `http://localhost:8081/api`
 
 ## 🔧 Maven Wrapper Benefits
 
@@ -332,11 +424,14 @@ docker-compose down
 
 ### Available Services
 
-- **Product API**: `http://localhost:8080/api`
-- **Swagger UI**: `http://localhost:8080/api/swagger-ui.html`
-- **Health Check**: `http://localhost:8080/api/actuator/health`
-- **Metrics**: `http://localhost:8080/api/actuator/metrics`
-- **Redis Commander**: `http://localhost:8081`
+- **Product API (No Security)**: `http://localhost:8080/api`
+- **Product API (With Security)**: `http://localhost:8081/api`
+- **Swagger UI (No Security)**: `http://localhost:8080/api/swagger-ui.html`
+- **Swagger UI (With Security)**: `http://localhost:8081/api/swagger-ui.html` (Admin only)
+- **Health Check**: `http://localhost:8080/api/actuator/health` (both modes)
+- **Metrics**: `http://localhost:8080/api/actuator/metrics` (both modes)
+- **Security Status**: `http://localhost:8080/api/status/security` (both modes)
+- **Redis Commander**: `http://localhost:8081` (Web UI for Redis)
 
 ### Docker Commands
 
@@ -366,6 +461,8 @@ docker-compose down
 - **Network isolation**: Secure service communication
 - **Redis integration**: Ready for caching implementation
 - **Performance**: 40% faster builds with Maven wrapper optimization
+- **🔐 Dual Security Modes**: Both secure and non-secure instances running simultaneously
+- **🛡️ Profile-Based Configuration**: Easy switching between security modes
 
 ### Production Deployment
 
@@ -378,6 +475,8 @@ docker-compose -f docker-compose.prod.yml up -d
 ```
 
 ### Sample Usage
+
+**Without Security (Default Mode):**
 
 **Get all products:**
 ```bash
@@ -402,6 +501,42 @@ curl -X POST "http://localhost:8080/api/products" \
 curl -X GET "http://localhost:8080/api/products/search?category=Electronics&minRating=4"
 ```
 
+**With Security Mode:**
+
+**Login to get JWT token:**
+```bash
+curl -X POST "http://localhost:8081/api/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "password": "admin123"
+  }'
+```
+
+**Use JWT token for authenticated requests:**
+```bash
+# Get all products (requires authentication)
+curl -X GET "http://localhost:8081/api/products" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+
+# Create a new product (requires ADMIN role)
+curl -X POST "http://localhost:8081/api/products" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "name": "Gaming Laptop",
+    "description": "High-performance gaming laptop",
+    "price": 1999.99,
+    "category": "Electronics",
+    "rating": 5
+  }'
+```
+
+**Check security status:**
+```bash
+curl -X GET "http://localhost:8080/api/status/security"
+```
+
 **Check application health:**
 ```bash
 curl -X GET "http://localhost:8080/api/actuator/health"
@@ -420,6 +555,7 @@ curl -X GET "http://localhost:8080/api/actuator/metrics/product.operations.creat
 ## 📚 Documentation
 
 - **[Setup & Run Guide](docs/run.md)** - Detailed instructions for running the application
+- **[Security Documentation](SECURITY.md)** - Comprehensive security implementation guide
 - **[Project Plan](docs/project-plan.md)** - Development roadmap and milestones
 - **[API Prompts](docs/prompts.md)** - Development prompts and requirements
 
@@ -488,7 +624,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🏷️ Version History
 
-- **v0.0.1-SNAPSHOT** - Initial release with core CRUD operations, search functionality, repository pattern implementation, Docker containerization, and Maven wrapper integration
+- **v0.0.1-SNAPSHOT** - Initial release with core CRUD operations, search functionality, repository pattern implementation, Docker containerization, Maven wrapper integration, and comprehensive security implementation with JWT authentication and profile-based security modes
 
 ## 🔮 Roadmap
 
@@ -496,8 +632,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [x] Metrics and monitoring (Spring Boot Actuator) - Custom health indicators and business metrics implemented
 - [x] Docker containerization - Multi-stage builds with health checks and security
 - [x] Maven wrapper integration - Consistent Maven version and faster Docker builds
+- [x] **Authentication and authorization (JWT)** - Profile-based security with role-based access control
+- [x] **Security implementation** - JWT tokens, in-memory users, conditional security components
 - [ ] Database integration (PostgreSQL/MySQL) - Repository pattern enables easy migration and JPA/Hibernate adoption
-- [ ] Authentication and authorization (JWT)
 - [ ] Rate limiting and API throttling
 - [ ] Caching implementation (Redis) - Can be added as repository decorator
 - [ ] Kubernetes deployment manifests
