@@ -2,6 +2,7 @@ package com.example.productapi.service;
 
 import com.example.productapi.dto.ProductDTO;
 import com.example.productapi.mapper.ProductMapper;
+import com.example.productapi.metrics.ProductMetrics;
 import com.example.productapi.model.Product;
 import com.example.productapi.repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,12 +29,15 @@ class ProductServiceTest {
     
     @Mock
     private ProductMapper productMapper;
+    
+    @Mock
+    private ProductMetrics productMetrics;
 
     private ProductService productService;
 
     @BeforeEach
     void setUp() {
-        productService = new ProductService(productRepository, productMapper);
+        productService = new ProductService(productRepository, productMapper, productMetrics);
     }
 
     @Test
