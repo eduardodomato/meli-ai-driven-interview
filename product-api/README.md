@@ -18,7 +18,7 @@ The Product API provides a comprehensive solution for managing product data with
 - **Data Validation** - Comprehensive input validation with detailed error messages
 - **Exception Handling** - Centralized error handling with consistent API responses
 - **API Documentation** - Interactive Swagger UI for easy testing and integration
-- **JSON Persistence** - File-based data storage for simplicity and portability
+- **JSON Persistence** - File-based data storage been required for simplicity, I consider an in-memory DB a better option (H2 for example)
 - **Null Safety** - Robust handling of null values to prevent runtime errors
 
 ## 📋 API Endpoints
@@ -152,11 +152,34 @@ The Product API provides a comprehensive solution for managing product data with
   - Slightly tighter coupling between controller and service layers
   - Still maintains excellent testability through Spring's dependency injection
 
+#### 10. **DTO Pattern Implementation with Records**
+- **Decision**: Use Data Transfer Objects (DTOs) implemented as Java records to separate internal entities from API responses
+- **Problem**: Internal fields like `createdAt` and `updatedAt` should not be exposed in API responses
+- **Solution**: 
+  - `ProductDTO` record excludes internal fields (`createdAt`, `updatedAt`)
+  - `ProductMapper` handles conversion between Entity and DTO
+  - Service layer uses DTOs for external communication
+- **Rationale**:
+  - Clean separation between internal data model and external API contract
+  - Prevents accidental exposure of internal fields
+  - Maintains audit trail internally while keeping API responses clean
+  - Follows best practices for API design and security
+  - **Records provide immutability, conciseness, and clear data carrier intent**
+  - **Automatic generation of constructor, getters, equals(), hashCode(), and toString()**
+  - **Type safety and compile-time guarantees about data structure**
+- **Trade-offs**:
+  - Additional mapping layer increases complexity
+  - More classes to maintain (DTO + Mapper)
+  - Requires updating tests to work with both Entity and DTO types
+  - **Records are immutable by default, which may require more careful handling in update scenarios**
+
 ### Project Structure
 ```
 product-api/
 ├── src/main/java/com/example/productapi/
 │   ├── controller/          # REST controllers
+│   ├── dto/                # Data Transfer Objects (API contracts)
+│   ├── mapper/             # Entity-DTO mapping utilities
 │   ├── model/              # Data models and entities
 │   ├── service/            # Business logic layer
 │   ├── repository/         # Data access layer (Repository pattern)
@@ -307,8 +330,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🔮 Roadmap
 
 - [x] Repository pattern implementation for reduced coupling
-- [ ] Database integration (PostgreSQL/MySQL) - Repository pattern enables easy migration
-- [ ] Authentication and authorization
+- [ ] Database integration (PostgreSQL/MySQL) - Repository pattern enables easy migration and JPA/Hibernate adoption
+- [ ] Authentication and authorization (JWT)
 - [ ] Rate limiting and API throttling
 - [ ] Caching implementation (Redis) - Can be added as repository decorator
 - [ ] Docker containerization

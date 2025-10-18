@@ -1,6 +1,6 @@
 package com.example.productapi.controller;
 
-import com.example.productapi.model.Product;
+import com.example.productapi.dto.ProductDTO;
 import com.example.productapi.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -39,9 +39,9 @@ public class ProductController {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved list of products"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<List<Product>> getAllProducts() {
+    public ResponseEntity<List<ProductDTO>> getAllProducts() {
         log.info("Getting all products");
-        List<Product> products = productService.getAllProducts();
+        List<ProductDTO> products = productService.getAllProducts();
         return ResponseEntity.ok(products);
     }
 
@@ -52,10 +52,10 @@ public class ProductController {
         @ApiResponse(responseCode = "404", description = "Product not found"),
         @ApiResponse(responseCode = "400", description = "Invalid product ID")
     })
-    public ResponseEntity<Product> getProductById(
+    public ResponseEntity<ProductDTO> getProductById(
             @Parameter(description = "Product ID") @PathVariable Long id) {
         log.info("Getting product with id: {}", id);
-        Optional<Product> product = productService.getProductById(id);
+        Optional<ProductDTO> product = productService.getProductById(id);
         return product.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -66,9 +66,9 @@ public class ProductController {
         @ApiResponse(responseCode = "201", description = "Product created successfully"),
         @ApiResponse(responseCode = "400", description = "Invalid product data")
     })
-    public ResponseEntity<Product> createProduct(@Valid @RequestBody Product product) {
-        log.info("Creating new product: {}", product.getName());
-        Product createdProduct = productService.createProduct(product);
+    public ResponseEntity<ProductDTO> createProduct(@Valid @RequestBody ProductDTO productDTO) {
+        log.info("Creating new product: {}", productDTO.name());
+        ProductDTO createdProduct = productService.createProduct(productDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdProduct);
     }
 
@@ -79,11 +79,11 @@ public class ProductController {
         @ApiResponse(responseCode = "404", description = "Product not found"),
         @ApiResponse(responseCode = "400", description = "Invalid product data")
     })
-    public ResponseEntity<Product> updateProduct(
+    public ResponseEntity<ProductDTO> updateProduct(
             @Parameter(description = "Product ID") @PathVariable Long id,
-            @Valid @RequestBody Product product) {
+            @Valid @RequestBody ProductDTO productDTO) {
         log.info("Updating product with id: {}", id);
-        Optional<Product> updatedProduct = productService.updateProduct(id, product);
+        Optional<ProductDTO> updatedProduct = productService.updateProduct(id, productDTO);
         return updatedProduct.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -110,7 +110,7 @@ public class ProductController {
         @ApiResponse(responseCode = "400", description = "Invalid search parameters"),
         @ApiResponse(responseCode = "404", description = "No products found matching criteria")
     })
-    public ResponseEntity<List<Product>> searchProducts(
+    public ResponseEntity<List<ProductDTO>> searchProducts(
             @Parameter(description = "Search term for product name (case-insensitive)") @RequestParam(required = false) String name,
             @Parameter(description = "Product category") @RequestParam(required = false) String category,
             @Parameter(description = "Minimum rating (1-5)") @RequestParam(required = false) Integer minRating,
@@ -143,7 +143,7 @@ public class ProductController {
         log.info("Searching products with criteria - name: {}, category: {}, minRating: {}, maxRating: {}, minPrice: {}, maxPrice: {}", 
                 name, category, minRating, maxRating, minPrice, maxPrice);
         
-        List<Product> products = productService.searchProducts(name, category, minRating, maxRating, minPrice, maxPrice);
+        List<ProductDTO> products = productService.searchProducts(name, category, minRating, maxRating, minPrice, maxPrice);
         return products.isEmpty() ? ResponseEntity.notFound().build() 
                                  : ResponseEntity.ok(products);
     }
