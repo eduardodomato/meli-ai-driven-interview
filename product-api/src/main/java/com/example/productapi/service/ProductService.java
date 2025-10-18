@@ -1,5 +1,7 @@
 package com.example.productapi.service;
 
+import com.example.productapi.dto.ProductDTO;
+import com.example.productapi.mapper.ProductMapper;
 import com.example.productapi.model.Product;
 import com.example.productapi.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,7 @@ import java.util.Optional;
 /**
  * Service class for managing Product entities
  * Contains business logic and delegates data access to ProductRepository
+ * Uses DTOs for external communication while maintaining entities internally
  */
 @Slf4j
 @Service
@@ -20,33 +23,46 @@ import java.util.Optional;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final ProductMapper productMapper;
 
-    public List<Product> getAllProducts() {
+    public List<ProductDTO> getAllProducts() {
         log.info("Retrieving all products");
-        return productRepository.findAll();
+        List<Product> products = productRepository.findAll();
+        return productMapper.toDTOList(products);
     }
 
-    public Optional<Product> getProductById(Long id) {
+    public Optional<ProductDTO> getProductById(Long id) {
         log.info("Retrieving product with id: {}", id);
-        return productRepository.findById(id);
+        Optional<Product> product = productRepository.findById(id);
+        return productMapper.toDTOOptional(product);
     }
 
-    public Product createProduct(Product product) {
-        log.info("Creating new product: {}", product.getName());
-        return productRepository.save(product);
+    public ProductDTO createProduct(ProductDTO productDTO) {
+        log.info("Creating new product: {}", productDTO.name());
+        Product product = productMapper.toEntity(productDTO);
+        Product savedProduct = productRepository.save(product);
+        return productMapper.toDTO(savedProduct);
     }
 
-    public Optional<Product> updateProduct(Long id, Product updatedProduct) {
+    public Optional<ProductDTO> updateProduct(Long id, ProductDTO updatedProductDTO) {
         log.info("Updating product with id: {}", id);
         
         if (!productRepository.existsById(id)) {
             return Optional.empty();
         }
         
-        updatedProduct.setId(id);
+        // Get existing product to preserve createdAt
+        Optional<Product> existingProductOpt = productRepository.findById(id);
+        if (existingProductOpt.isEmpty()) {
+            return Optional.empty();
+        }
+        
+        Product existingProduct = existingProductOpt.get();
+        productMapper.updateEntity(existingProduct, updatedProductDTO);
+        
         try {
-            Product savedProduct = productRepository.update(updatedProduct);
-            return Optional.of(savedProduct);
+            Product savedProduct = productRepository.update(existingProduct);
+            return Optional.of(productMapper.toDTO(savedProduct));
         } catch (IllegalArgumentException e) {
             // Handle race condition: product was deleted between existsById() check and update() call
             log.warn("Product with id {} was deleted concurrently during update operation", id);
@@ -59,10 +75,11 @@ public class ProductService {
         return productRepository.deleteById(id);
     }
 
-    public List<Product> searchProducts(String name, String category, Integer minRating, Integer maxRating, BigDecimal minPrice, BigDecimal maxPrice) {
+    public List<ProductDTO> searchProducts(String name, String category, Integer minRating, Integer maxRating, BigDecimal minPrice, BigDecimal maxPrice) {
         log.info("Searching products with criteria - name: {}, category: {}, minRating: {}, maxRating: {}, minPrice: {}, maxPrice: {}", 
                 name, category, minRating, maxRating, minPrice, maxPrice);
         
-        return productRepository.search(name, category, minRating, maxRating, minPrice, maxPrice);
+        List<Product> products = productRepository.search(name, category, minRating, maxRating, minPrice, maxPrice);
+        return productMapper.toDTOList(products);
     }
 }
