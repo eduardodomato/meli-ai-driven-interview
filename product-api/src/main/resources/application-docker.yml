@@ -1,0 +1,26 @@
+# Docker Profile Configuration
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: product-api
+
+# Docker-specific logging
+logging:
+  level:
+    com.example.productapi: INFO
+    org.springframework.cache: INFO
+    org.springframework.web: INFO
+
+# Actuator configuration for Docker
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,env
+  endpoint:
+    health:
+      show-details: when-authorized

@@ -8,7 +8,9 @@ Before running the application, make sure you have the following installed on yo
 
 ### Required Software
 - **Java 21** or higher
-- **Maven 3.6+** (for building and running the application)
+- **Maven 3.6+** (optional - Maven wrapper included)
+- **Docker 20.10+** (optional - for containerized deployment)
+- **Docker Compose 2.0+** (optional - for multi-service deployment)
 - **Git** (for cloning the repository)
 
 ### How to Check Your Installation
@@ -25,6 +27,13 @@ mvn -version
 ```
 You should see output like: `Apache Maven 3.x.x`
 
+**Check Docker version:**
+```bash
+docker --version
+docker-compose --version
+```
+You should see output like: `Docker version 20.x.x` and `Docker Compose version 2.x.x`
+
 ## Getting Started
 
 ### 1. Clone the Repository (if not already done)
@@ -34,37 +43,135 @@ cd meli-ai-driven-interview/product-api
 ```
 
 ### 2. Build the Application
+
+#### Option A: Using Maven (if installed)
 ```bash
 mvn clean compile
 ```
 
+#### Option B: Using Maven Wrapper (Recommended)
+```bash
+./mvnw clean compile
+```
+
 ### 3. Run Tests (Optional but Recommended)
+
+#### Option A: Using Maven
 ```bash
 mvn test
 ```
+
+#### Option B: Using Maven Wrapper
+```bash
+./mvnw test
+```
+
 This will run all unit tests to ensure everything is working correctly.
 
 ### 4. Start the Application
 
-#### Option A: Using Maven (Recommended for Development)
+#### Option A: Using Maven (if installed)
 ```bash
 mvn spring-boot:run
 ```
 
-#### Option B: Build and Run JAR
+#### Option B: Using Maven Wrapper (Recommended)
 ```bash
-# Build the JAR file
-mvn clean package
+./mvnw spring-boot:run
+```
+
+#### Option C: Build and Run JAR
+```bash
+# Build the JAR file using wrapper
+./mvnw clean package
 
 # Run the JAR file
 java -jar target/product-api-0.0.1-SNAPSHOT.jar
 ```
 
-#### Option C: Using IDE
+#### Option D: Using Docker (Containerized)
+```bash
+# Build and start with Docker Compose
+docker-compose up -d
+
+# Or build and run manually
+docker build -t product-api:latest .
+docker run -p 8080:8080 product-api:latest
+```
+
+#### Option E: Using IDE
 If you're using an IDE like IntelliJ IDEA or Eclipse:
 1. Import the project as a Maven project
 2. Navigate to `ProductApiApplication.java`
 3. Right-click and select "Run ProductApiApplication"
+
+## 🐳 Docker Deployment
+
+The application includes comprehensive Docker support for easy deployment and development.
+
+### Quick Start with Docker
+
+```bash
+# Start all services (API + Redis + Redis Commander)
+docker-compose up -d
+
+# Check service status
+docker-compose ps
+
+# View logs
+docker-compose logs product-api
+
+# Stop services
+docker-compose down
+```
+
+### Available Services
+
+When running with Docker Compose, you get:
+
+- **Product API**: `http://localhost:8080/api`
+- **Swagger UI**: `http://localhost:8080/api/swagger-ui.html`
+- **Health Check**: `http://localhost:8080/api/actuator/health`
+- **Metrics**: `http://localhost:8080/api/actuator/metrics`
+- **Redis Commander**: `http://localhost:8081` (Web UI for Redis)
+
+### Docker Commands
+
+```bash
+# Build image
+docker build -t product-api:latest .
+
+# Run container
+docker run -p 8080:8080 product-api:latest
+
+# Build and run with Compose
+docker-compose up --build
+
+# View logs
+docker-compose logs -f product-api
+
+# Stop all services
+docker-compose down
+```
+
+### Production Deployment
+
+```bash
+# Build production image
+docker build -t product-api:latest .
+
+# Run with production compose
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+### Docker Features
+
+- **Multi-stage build**: Optimized production image
+- **Security**: Non-root user execution
+- **Health checks**: Container orchestration ready
+- **Volume management**: Data persistence
+- **Network isolation**: Secure service communication
+- **Redis integration**: Ready for caching implementation
 
 ## Application Details
 
