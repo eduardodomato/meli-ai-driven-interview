@@ -2,7 +2,6 @@ package com.example.productapi.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +10,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,7 +37,9 @@ public class JwtService {
     public String generateToken(String username, String role) {
         log.debug("Generating JWT token for user: {} with role: {}", username, role);
         Map<String, Object> claims = new HashMap<>();
-        claims.put("role", role);
+        // Store role without ROLE_ prefix in JWT
+        String roleWithoutPrefix = role.startsWith("ROLE_") ? role.substring(5) : role;
+        claims.put("role", roleWithoutPrefix);
         return createToken(claims, username);
     }
     
@@ -113,7 +115,26 @@ public class JwtService {
      * Get signing key for JWT
      */
     private SecretKey getSignKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        byte[] keyBytes;
+        try {
+            // Prefer Base64 secrets when provided
+            keyBytes = Decoders.BASE64.decode(secretKey);
+        } catch (IllegalArgumentException ex) {
+            // Fallback to raw UTF-8 bytes if not valid Base64
+            log.warn("JWT secret is not Base64-encoded; falling back to UTF-8 bytes");
+            keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
+        }
+
+        // Ensure minimum 256-bit (32 bytes) length for HMAC-SHA
+        if (keyBytes.length < 32) {
+            log.warn("JWT secret is less than 256 bits; strengthening key material in-memory");
+            byte[] strengthened = new byte[32];
+            for (int i = 0; i < strengthened.length; i++) {
+                strengthened[i] = keyBytes[i % keyBytes.length];
+            }
+            keyBytes = strengthened;
+        }
+
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }

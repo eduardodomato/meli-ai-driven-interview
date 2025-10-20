@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,10 +35,12 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping
-    @Operation(summary = "Get all products", description = "Retrieve a list of all products")
+    @Operation(summary = "Get all products", description = "Retrieve a list of all products", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved list of products"),
-        @ApiResponse(responseCode = "500", description = "Internal server error")
+        @ApiResponse(responseCode = "500", description = "Internal server error"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden - User or Admin role required")
     })
     public ResponseEntity<List<ProductDTO>> getAllProducts() {
         log.info("Getting all products");
@@ -46,11 +49,13 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get product by ID", description = "Retrieve a specific product by its ID")
+    @Operation(summary = "Get product by ID", description = "Retrieve a specific product by its ID", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Product found"),
         @ApiResponse(responseCode = "404", description = "Product not found"),
-        @ApiResponse(responseCode = "400", description = "Invalid product ID")
+        @ApiResponse(responseCode = "400", description = "Invalid product ID"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden - User or Admin role required")
     })
     public ResponseEntity<ProductDTO> getProductById(
             @Parameter(description = "Product ID") @PathVariable Long id) {
@@ -61,10 +66,12 @@ public class ProductController {
     }
 
     @PostMapping
-    @Operation(summary = "Create a new product", description = "Create a new product in the system")
+    @Operation(summary = "Create a new product", description = "Create a new product in the system", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = "Product created successfully"),
-        @ApiResponse(responseCode = "400", description = "Invalid product data")
+        @ApiResponse(responseCode = "400", description = "Invalid product data"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden - Admin role required")
     })
     public ResponseEntity<ProductDTO> createProduct(@Valid @RequestBody ProductDTO productDTO) {
         log.info("Creating new product: {}", productDTO.name());
@@ -73,11 +80,13 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update product", description = "Update an existing product by ID")
+    @Operation(summary = "Update product", description = "Update an existing product by ID", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Product updated successfully"),
         @ApiResponse(responseCode = "404", description = "Product not found"),
-        @ApiResponse(responseCode = "400", description = "Invalid product data")
+        @ApiResponse(responseCode = "400", description = "Invalid product data"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden - Admin role required")
     })
     public ResponseEntity<ProductDTO> updateProduct(
             @Parameter(description = "Product ID") @PathVariable Long id,
@@ -89,11 +98,13 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete product", description = "Delete a product by ID")
+    @Operation(summary = "Delete product", description = "Delete a product by ID", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204", description = "Product deleted successfully"),
         @ApiResponse(responseCode = "404", description = "Product not found"),
-        @ApiResponse(responseCode = "400", description = "Invalid product ID")
+        @ApiResponse(responseCode = "400", description = "Invalid product ID"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden - Admin role required")
     })
     public ResponseEntity<Void> deleteProduct(
             @Parameter(description = "Product ID") @PathVariable Long id) {
@@ -104,11 +115,13 @@ public class ProductController {
     }
 
     @GetMapping("/search")
-    @Operation(summary = "Search products with flexible criteria", description = "Search for products using multiple optional criteria including name, category, rating range, and price range")
+    @Operation(summary = "Search products with flexible criteria", description = "Search for products using multiple optional criteria including name, category, rating range, and price range", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Products found"),
         @ApiResponse(responseCode = "400", description = "Invalid search parameters"),
-        @ApiResponse(responseCode = "404", description = "No products found matching criteria")
+        @ApiResponse(responseCode = "404", description = "No products found matching criteria"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden - User or Admin role required")
     })
     public ResponseEntity<List<ProductDTO>> searchProducts(
             @Parameter(description = "Search term for product name (case-insensitive)") @RequestParam(required = false) String name,

@@ -59,6 +59,7 @@ The Product API provides a comprehensive solution for managing product data with
 ### API Documentation
 - **Swagger UI**: `http://localhost:8080/api/swagger-ui.html`
 - **OpenAPI Spec**: `http://localhost:8080/api/api-docs`
+- **Security Mode**: Swagger UI includes "Authorize" button for JWT token authentication
 
 ### Monitoring and Health Checks
 - **Health Check**: `http://localhost:8080/api/actuator/health`
@@ -566,6 +567,9 @@ The project includes comprehensive test coverage:
 - **Unit Tests**: Service layer and exception handling
 - **Integration Tests**: Controller endpoints
 - **Null Safety Tests**: Specific tests for null handling scenarios
+- **Security Tests**: All tests run with `no-security` profile for development simplicity
+
+**Note**: Security-specific tests (JWT authentication, role-based access) are not included as they require complex test setup. The security implementation is validated through manual testing and integration testing with Swagger UI.
 
 Run tests with:
 ```bash

@@ -266,17 +266,60 @@ Once the application is running, you can access the following endpoints:
 ## Testing the Application
 
 ### 1. Using Swagger UI (Easiest Method)
+
+#### **Without Security (Default Mode)**
 1. Open your browser and go to: `http://localhost:8080/api/swagger-ui.html`
 2. You'll see an interactive API documentation interface
 3. Click on any endpoint to expand it
 4. Click "Try it out" to test the endpoint
 5. Fill in the required parameters and click "Execute"
 
+#### **With Security Mode**
+1. Start the application with security: `java -jar target/product-api-0.0.1-SNAPSHOT.jar --spring.profiles.active=security`
+2. Open Swagger UI: `http://localhost:8080/api/swagger-ui.html`
+3. **First, authenticate**: Click the "Authorize" button (🔒) in the top right
+4. **Enter JWT token**: Get token from `/auth/login` endpoint first, then enter as `Bearer YOUR_JWT_TOKEN`
+5. **Test secured endpoints**: Now you can test all endpoints with proper authentication
+6. **Lock icons** next to endpoints indicate they require authentication
+
 ### 2. Using curl Commands
+
+#### **Without Security (Default Mode)**
 
 **Get all products:**
 ```bash
 curl -X GET "http://localhost:8080/api/products"
+```
+
+#### **With Security Mode**
+
+**Step 1: Login to get JWT token**
+```bash
+curl -X POST "http://localhost:8080/api/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "password": "admin123"
+  }'
+```
+
+**Step 2: Use JWT token for authenticated requests**
+```bash
+# Get all products (requires authentication)
+curl -X GET "http://localhost:8080/api/products" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN_HERE"
+
+# Create a new product (requires ADMIN role)
+curl -X POST "http://localhost:8080/api/products" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN_HERE" \
+  -d '{
+    "name": "Test Product",
+    "description": "A test product",
+    "price": 99.99,
+    "category": "Electronics",
+    "rating": 4
+  }'
 ```
 
 **Get a specific product:**

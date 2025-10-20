@@ -6,6 +6,7 @@ import com.example.productapi.security.dto.UserInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -74,7 +75,7 @@ public class AuthController {
     }
     
     @GetMapping("/me")
-    @Operation(summary = "Get current user info", description = "Get information about the currently authenticated user")
+    @Operation(summary = "Get current user info", description = "Get information about the currently authenticated user", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "User information retrieved"),
         @ApiResponse(responseCode = "401", description = "Not authenticated")
@@ -96,7 +97,7 @@ public class AuthController {
     }
     
     @PostMapping("/validate")
-    @Operation(summary = "Validate JWT token", description = "Validate if the provided JWT token is valid")
+    @Operation(summary = "Validate JWT token", description = "Validate if the provided JWT token is valid", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Token is valid"),
         @ApiResponse(responseCode = "401", description = "Token is invalid")
