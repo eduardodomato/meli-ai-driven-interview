@@ -1,0 +1,271 @@
+{
+  "info": {
+    "name": "Product API - Full Test Suite",
+    "_postman_id": "7f21b6a3-8c3b-43c0-9b0a-1c3a29b1f0a0",
+    "description": "End-to-end tests for Product API with No Security and Security profiles.\n- Use {{baseUrl}} for server base\n- Use {{token}} for JWT (Security profile)\n- Run Auth/Login first in Security to set token automatically",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api" },
+    { "key": "token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Info",
+      "item": [
+        {
+          "name": "Security Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/status/security", "host": ["{{baseUrl}}"], "path": ["status", "security"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "No Security",
+      "description": "Use when running with profile 'no-security' (default). All endpoints are public.",
+      "item": [
+        {
+          "name": "Products - Get all",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/products", "host": ["{{baseUrl}}"], "path": ["products"] }
+          }
+        },
+        {
+          "name": "Products - Get by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/products/:id", "host": ["{{baseUrl}}"], "path": ["products", ":id"] }
+          }
+        },
+        {
+          "name": "Products - Search",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/products/search?name=phone&category=electronics&minRating=3&maxRating=5&minPrice=100&maxPrice=1200",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "search"],
+              "query": [
+                { "key": "name", "value": "phone" },
+                { "key": "category", "value": "electronics" },
+                { "key": "minRating", "value": "3" },
+                { "key": "maxRating", "value": "5" },
+                { "key": "minPrice", "value": "100" },
+                { "key": "maxPrice", "value": "1200" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Products - Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Product\",\n  \"description\": \"A new product\",\n  \"price\": 199.99,\n  \"category\": \"electronics\",\n  \"imageUrl\": \"https://example.com/image.jpg\",\n  \"rating\": 4,\n  \"specifications\": { \"color\": \"black\", \"warranty\": \"1y\" }\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/products", "host": ["{{baseUrl}}"], "path": ["products"] }
+          }
+        },
+        {
+          "name": "Products - Update",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"name\": \"Test Product Updated\",\n  \"description\": \"Updated description\",\n  \"price\": 149.99,\n  \"category\": \"electronics\",\n  \"imageUrl\": \"https://example.com/image2.jpg\",\n  \"rating\": 5,\n  \"specifications\": { \"color\": \"white\" }\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/products/:id", "host": ["{{baseUrl}}"], "path": ["products", ":id"] }
+          }
+        },
+        {
+          "name": "Products - Delete",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/products/:id", "host": ["{{baseUrl}}"], "path": ["products", ":id"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "With Security",
+      "description": "Use when running with profile 'security'. Auth → Login to get token, then call protected endpoints.",
+      "item": [
+        {
+          "name": "Auth",
+          "item": [
+            {
+              "name": "Login (set token)",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Login returns 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "try {",
+                      "  const data = pm.response.json();",
+                      "  if (data && data.token) {",
+                      "    pm.collectionVariables.set('token', data.token);",
+                      "  }",
+                      "} catch (e) {}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Me (current user)",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] }
+              }
+            },
+            {
+              "name": "Validate Token",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": { "raw": "{{baseUrl}}/auth/validate", "host": ["{{baseUrl}}"], "path": ["auth", "validate"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Products (secured)",
+          "item": [
+            {
+              "name": "Get all",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": { "raw": "{{baseUrl}}/products", "host": ["{{baseUrl}}"], "path": ["products"] }
+              }
+            },
+            {
+              "name": "Get by ID",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": { "raw": "{{baseUrl}}/products/:id", "host": ["{{baseUrl}}"], "path": ["products", ":id"] }
+              }
+            },
+            {
+              "name": "Search",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": {
+                  "raw": "{{baseUrl}}/products/search?name=phone&minPrice=100&maxPrice=1200",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["products", "search"],
+                  "query": [
+                    { "key": "name", "value": "phone" },
+                    { "key": "minPrice", "value": "100" },
+                    { "key": "maxPrice", "value": "1200" }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create (ADMIN only)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Secured Product\",\n  \"description\": \"Created by admin\",\n  \"price\": 299.99,\n  \"category\": \"electronics\",\n  \"imageUrl\": \"https://example.com/img.jpg\",\n  \"rating\": 4,\n  \"specifications\": { \"size\": \"M\" }\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/products", "host": ["{{baseUrl}}"], "path": ["products"] }
+              }
+            },
+            {
+              "name": "Update (ADMIN only)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 1,\n  \"name\": \"Secured Product Updated\",\n  \"description\": \"Updated by admin\",\n  \"price\": 259.99,\n  \"category\": \"electronics\",\n  \"imageUrl\": \"https://example.com/img2.jpg\",\n  \"rating\": 5,\n  \"specifications\": { \"size\": \"L\" }\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/products/:id", "host": ["{{baseUrl}}"], "path": ["products", ":id"] }
+              }
+            },
+            {
+              "name": "Delete (ADMIN only)",
+              "request": {
+                "method": "DELETE",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": { "raw": "{{baseUrl}}/products/:id", "host": ["{{baseUrl}}"], "path": ["products", ":id"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Admin & Docs",
+          "description": "These require ADMIN role in Security profile.",
+          "item": [
+            {
+              "name": "Actuator - Health",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": { "raw": "{{baseUrl}}/actuator/health", "host": ["{{baseUrl}}"], "path": ["actuator", "health"] }
+              }
+            },
+            {
+              "name": "Actuator - Info",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": { "raw": "{{baseUrl}}/actuator/info", "host": ["{{baseUrl}}"], "path": ["actuator", "info"] }
+              }
+            },
+            {
+              "name": "OpenAPI JSON",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": { "raw": "{{baseUrl}}/v3/api-docs", "host": ["{{baseUrl}}"], "path": ["v3", "api-docs"] }
+              }
+            },
+            {
+              "name": "Swagger UI",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": { "raw": "{{baseUrl}}/swagger-ui.html", "host": ["{{baseUrl}}"], "path": ["swagger-ui.html"] }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+
