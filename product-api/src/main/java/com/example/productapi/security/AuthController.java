@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 @ConditionalOnProperty(name = "spring.profiles.active", havingValue = "security")
 @Tag(name = "Authentication", description = "Authentication endpoints for JWT token management")

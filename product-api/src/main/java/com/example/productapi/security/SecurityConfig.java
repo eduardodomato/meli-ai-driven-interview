@@ -39,20 +39,22 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Public endpoints
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/actuator/health").permitAll()
-                
+                // Public endpoints (context-path is /api, matchers must NOT include it)
+                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/status/security").permitAll()
+                .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                .requestMatchers("/error").permitAll()
+
                 // Product endpoints with role-based access
-                .requestMatchers(HttpMethod.GET, "/api/products/**").hasAnyRole("USER", "ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/products/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/products/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("ADMIN")
-                
+                .requestMatchers(HttpMethod.GET, "/products/**").hasAnyRole("USER", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/products/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/products/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/products/**").hasRole("ADMIN")
+
                 // Admin-only endpoints
-                .requestMatchers("/api-docs/**", "/swagger-ui/**").hasRole("ADMIN")
-                .requestMatchers("/api/actuator/**").hasRole("ADMIN")
-                
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").hasRole("ADMIN")
+                .requestMatchers("/actuator/**").hasRole("ADMIN")
+
                 // All other requests require authentication
                 .anyRequest().authenticated()
             )

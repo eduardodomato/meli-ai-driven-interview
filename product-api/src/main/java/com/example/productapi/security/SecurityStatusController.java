@@ -14,7 +14,7 @@ import java.util.Map;
  * Provides information about current security configuration
  */
 @RestController
-@RequestMapping("/api/status")
+@RequestMapping("/status")
 public class SecurityStatusController {
     
     @Value("${spring.profiles.active:no-security}")
