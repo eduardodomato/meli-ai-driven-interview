@@ -1,13 +1,15 @@
+# Default profile - No security
+spring:
+  application:
+    name: product-api
+  profiles:
+    active: no-security
+
 # Server Configuration
 server:
   port: 8080
   servlet:
     context-path: /api
-
-# Application Configuration
-spring:
-  application:
-    name: product-api
 
 # JSON File Configuration
 app:

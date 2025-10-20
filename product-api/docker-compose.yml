@@ -1,14 +1,37 @@
-version: '3.8'
-
 services:
-  # Your Spring Boot Application
-  product-api:
+  # Spring Boot Application without Security
+  product-api-no-security:
     build: .
-    container_name: product-api-app
+    container_name: product-api-no-security
     ports:
       - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_PROFILES_ACTIVE=no-security
+      - SERVER_PORT=8080
+    volumes:
+      - ./src/main/resources/products.json:/app/products.json:ro
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/api/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - product-api-network
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  # Spring Boot Application with Security
+  product-api-with-security:
+    build: .
+    container_name: product-api-with-security
+    ports:
+      - "8081:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=security
+      - JWT_SECRET=mySecretKeyForLocalDevelopment
+      - JWT_EXPIRATION=3600000
       - SERVER_PORT=8080
     volumes:
       - ./src/main/resources/products.json:/app/products.json:ro
