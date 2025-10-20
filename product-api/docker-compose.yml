@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Spring Boot Application without Security
   product-api-no-security:
