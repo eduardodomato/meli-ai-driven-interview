@@ -69,7 +69,7 @@ services:
     image: rediscommander/redis-commander:latest
     container_name: product-api-redis-commander
     ports:
-      - "8081:8081"
+      - "8082:8081"
     environment:
       - REDIS_HOSTS=local:redis:6379
     depends_on:
