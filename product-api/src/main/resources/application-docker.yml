@@ -1,0 +1,35 @@
+# Docker Profile Configuration with Security
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  profiles:
+    active: security
+  application:
+    name: product-api
+
+# JWT Configuration for Docker
+jwt:
+  secret: ${JWT_SECRET:mySecretKeyForLocalDevelopment}
+  expiration: ${JWT_EXPIRATION:3600000} # 1 hour
+
+# Docker-specific logging
+logging:
+  level:
+    com.example.productapi: INFO
+    com.example.productapi.security: INFO
+    org.springframework.security: WARN
+    org.springframework.cache: INFO
+    org.springframework.web: INFO
+
+# Actuator configuration for Docker
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,env
+  endpoint:
+    health:
+      show-details: when-authorized

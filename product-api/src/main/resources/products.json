@@ -1,0 +1,92 @@
+[
+  {
+    "id": 1,
+    "name": "Laptop Pro 15",
+    "description": "High-performance laptop with 16GB RAM and 512GB SSD",
+    "price": 1299.99,
+    "category": "Electronics",
+    "imageUrl": "https://example.com/images/laptop-pro-15.jpg",
+    "rating": 5,
+    "specifications": {
+      "RAM": "16GB",
+      "Storage": "512GB SSD",
+      "Processor": "Intel i7",
+      "Screen Size": "15.6 inches",
+      "Operating System": "Windows 11"
+    },
+    "createdAt": "2024-01-15T10:30:00",
+    "updatedAt": "2024-01-15T10:30:00"
+  },
+  {
+    "id": 2,
+    "name": "Wireless Headphones",
+    "description": "Noise-cancelling wireless headphones with 30-hour battery life",
+    "price": 199.99,
+    "category": "Electronics",
+    "imageUrl": "https://example.com/images/wireless-headphones.jpg",
+    "rating": 4,
+    "specifications": {
+      "Battery Life": "30 hours",
+      "Connectivity": "Bluetooth 5.0",
+      "Noise Cancellation": "Active",
+      "Weight": "250g",
+      "Water Resistance": "IPX4"
+    },
+    "createdAt": "2024-01-16T14:20:00",
+    "updatedAt": "2024-01-16T14:20:00"
+  },
+  {
+    "id": 3,
+    "name": "Coffee Maker",
+    "description": "Programmable coffee maker with built-in grinder",
+    "price": 89.99,
+    "category": "Home & Kitchen",
+    "imageUrl": "https://example.com/images/coffee-maker.jpg",
+    "rating": 4,
+    "specifications": {
+      "Capacity": "12 cups",
+      "Grinder": "Built-in",
+      "Timer": "24-hour programmable",
+      "Material": "Stainless Steel",
+      "Warranty": "2 years"
+    },
+    "createdAt": "2024-01-17T09:15:00",
+    "updatedAt": "2024-01-17T09:15:00"
+  },
+  {
+    "id": 4,
+    "name": "Running Shoes",
+    "description": "Comfortable running shoes with advanced cushioning",
+    "price": 129.99,
+    "category": "Sports",
+    "imageUrl": "https://example.com/images/running-shoes.jpg",
+    "rating": 5,
+    "specifications": {
+      "Size Range": "6-12 US",
+      "Material": "Mesh Upper",
+      "Cushioning": "Advanced Air",
+      "Weight": "280g",
+      "Type": "Running"
+    },
+    "createdAt": "2024-01-18T16:45:00",
+    "updatedAt": "2024-01-18T16:45:00"
+  },
+  {
+    "id": 5,
+    "name": "Smartphone",
+    "description": "Latest smartphone with 128GB storage and dual camera",
+    "price": 799.99,
+    "category": "Electronics",
+    "imageUrl": "https://example.com/images/smartphone.jpg",
+    "rating": 4,
+    "specifications": {
+      "Storage": "128GB",
+      "Camera": "Dual 12MP",
+      "Screen": "6.1 inch OLED",
+      "Battery": "3000mAh",
+      "Operating System": "iOS 17"
+    },
+    "createdAt": "2024-01-19T11:30:00",
+    "updatedAt": "2024-01-19T11:30:00"
+  }
+]

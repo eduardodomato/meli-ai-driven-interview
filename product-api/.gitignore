@@ -1,0 +1,6 @@
+docs/postman/env.local.postman_environment.json
+target/
+build/
+*.jar
+*.war
+*.class
